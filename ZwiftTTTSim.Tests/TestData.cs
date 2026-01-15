@@ -11,9 +11,24 @@ public static class TestData
             new RiderData { Name = "Alice", FTP = 300, Weight = 70 },
             new RiderData { Name = "Bob", FTP = 280, Weight = 75 },
             new RiderData { Name = "Charlie", FTP = 320, Weight = 72 },
-            new RiderData { Name = "Diana", FTP = 290, Weight = 68 },
-            new RiderData { Name = "Simone", FTP = 260, Weight = 98 }
+            new RiderData { Name = "Diana", FTP = 290, Weight = 68 }
         };
+    }
+
+    public static List<RiderData> GetSampleRiders6()
+    {
+        var list = GetSampleRiders();
+        list.Add(new RiderData { Name = "Simone", FTP = 260, Weight = 98 });
+        list.Add(new RiderData { Name = "Eve", FTP = 310, Weight = 65 });
+        return list;
+    }
+
+    public static List<RiderData> GetSampleRiders8()
+    {
+        var list = GetSampleRiders6();
+        list.Add(new RiderData { Name = "Frank", FTP = 300, Weight = 80 });
+        list.Add(new RiderData { Name = "Grace", FTP = 320, Weight = 68 });
+        return list;
     }
 
     public static List<RiderPowerPlan> GetSampleRiderPowerPlans()
