@@ -7,7 +7,7 @@ public class CsvParser
     public List<RiderPowerPlan> ParseCsv(string csvContent)
     {
         var riders = new List<RiderPowerPlan>();
-        var lines = csvContent.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var lines = csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         foreach (var line in lines)
         {
@@ -21,6 +21,7 @@ public class CsvParser
 
             var name = parts[0];
             
+            // Parse Weight and FTP (currently not used in workout generation, but part of the rider data model)
             if (!double.TryParse(parts[1], out var weight))
                 throw new ArgumentException($"Invalid weight value: {parts[1]}");
             
