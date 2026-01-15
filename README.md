@@ -70,11 +70,24 @@ In practice, this input can be:
 
 - One structured workout per rider
 - Exported as XML-based workout files (e.g. Zwift `.zwo` / WKO-compatible formats)
+- Visual representation (PNG images) showing power profile over time with color-coded position indicators
 - Workouts can be executed on:
   - Zwift
   - TrainerRoad
   - Wahoo SYSTM
   - Any platform supporting ERG mode workouts
+
+### Example Workout Visualization
+
+![Example Workout Visualization](example_workout_visualization.png)
+
+The visualization shows:
+- **X-axis**: Time (proportional to interval duration)
+- **Y-axis**: Power output in watts
+- **Color coding**: 
+  - 🔴 Red: 1st position (pulling hard)
+  - 🟡 Yellow: 2nd-3rd position (moderate effort)
+  - 🟢 Green: 4th+ position (drafting)
 
 ---
 
