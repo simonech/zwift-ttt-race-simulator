@@ -116,7 +116,7 @@ Console.ResetColor();
 Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
 foreach (var riderName in workouts.Keys)
 {
-    var fileName = $"{riderName.Replace(" ", "_")}_TTT_Workout.zwo";
+    var fileName = ZwoExporter.GetWorkoutFileName(riderName);
     Console.WriteLine($"   - {fileName}");
 }
 Console.WriteLine();

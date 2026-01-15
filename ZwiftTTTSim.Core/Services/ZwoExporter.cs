@@ -1,11 +1,20 @@
 using System.Text;
 using System.Xml;
+using System.IO;
 using ZwiftTTTSim.Core.Model;
 
 namespace ZwiftTTTSim.Core.Services;
 
 public class ZwoExporter
 {
+    public static string GetWorkoutFileName(string riderName)
+    {
+        // Sanitize the rider name to create a valid filename
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitizedName = string.Concat(riderName.Select(c => invalidChars.Contains(c) ? '_' : c));
+        return $"{sanitizedName}_TTT_Workout.zwo";
+    }
+
     public string ExportToZwo(string riderName, List<WorkoutStep> steps)
     {
         var settings = new XmlWriterSettings
@@ -51,7 +60,7 @@ public class ZwoExporter
         foreach (var (riderName, steps) in workouts)
         {
             var zwoContent = ExportToZwo(riderName, steps);
-            var fileName = $"{riderName.Replace(" ", "_")}_TTT_Workout.zwo";
+            var fileName = GetWorkoutFileName(riderName);
             var filePath = Path.Combine(outputDirectory, fileName);
             File.WriteAllText(filePath, zwoContent);
         }

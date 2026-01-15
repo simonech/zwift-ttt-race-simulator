@@ -258,4 +258,30 @@ public class ZwiftTTTSimTests
             }
         }
     }
+
+    [Theory]
+    [InlineData("Alice", "Alice_TTT_Workout.zwo")]
+    [InlineData("Bob Smith", "Bob Smith_TTT_Workout.zwo")]
+    public void ZwoExporter_GetWorkoutFileName_ShouldSanitizeInvalidCharacters(string riderName, string expectedFileName)
+    {
+        // Act
+        var result = ZwoExporter.GetWorkoutFileName(riderName);
+
+        // Assert
+        Assert.Equal(expectedFileName, result);
+        // Verify no invalid filename characters remain
+        var invalidChars = Path.GetInvalidFileNameChars();
+        Assert.DoesNotContain(result, c => invalidChars.Contains(c));
+    }
+
+    [Fact]
+    public void ZwoExporter_GetWorkoutFileName_ShouldSanitizeForwardSlash()
+    {
+        // Forward slash is invalid on all platforms
+        var result = ZwoExporter.GetWorkoutFileName("Test/Rider");
+        
+        Assert.Equal("Test_Rider_TTT_Workout.zwo", result);
+        var invalidChars = Path.GetInvalidFileNameChars();
+        Assert.DoesNotContain(result, c => invalidChars.Contains(c));
+    }
 }
