@@ -119,5 +119,19 @@ foreach (var riderName in workouts.Keys)
     var fileName = ZwoExporter.GetWorkoutFileName(riderName);
     Console.WriteLine($"   - {fileName}");
 }
+
+// Export workout images
+var imageExporter = new ImageExporter();
+imageExporter.ExportToFiles(workouts, outputDirectory, powerPlans.Count);
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"\n✅ Workout images exported to '{outputDirectory}' directory");
+Console.ResetColor();
+Console.WriteLine($"   Generated {workouts.Count} PNG files:");
+foreach (var riderName in workouts.Keys)
+{
+    var fileName = ImageExporter.GetWorkoutImageFileName(riderName);
+    Console.WriteLine($"   - {fileName}");
+}
 Console.WriteLine();
 
