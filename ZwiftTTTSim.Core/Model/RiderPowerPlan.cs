@@ -10,4 +10,6 @@ public class RiderPowerPlan
     // [2] = power when in 3rd position
     // [3] = power for 4th and all later positions (positions >= 4 use the last entry)
     public int[] PowerByPosition { get; set; } = [];
+
+    public RiderData Rider { get; set; } = new RiderData();
 }

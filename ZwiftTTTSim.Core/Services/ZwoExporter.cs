@@ -45,7 +45,7 @@ public class ZwoExporter
             {
                 writer.WriteStartElement("SteadyState");
                 writer.WriteAttributeString("Duration", step.DurationSeconds.ToString(CultureInfo.InvariantCulture));
-                writer.WriteAttributeString("Power", step.Power.ToString("F0", CultureInfo.InvariantCulture));
+                writer.WriteAttributeString("Power", step.Intensity.ToString("F2", CultureInfo.InvariantCulture));
                 writer.WriteEndElement(); // SteadyState
             }
             writer.WriteEndElement(); // workout

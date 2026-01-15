@@ -8,37 +8,43 @@ var powerPlans = new List<RiderPowerPlan>
     {
         Name = "Alice",
         PullDuration = TimeSpan.FromSeconds(30),
-        PowerByPosition = [350, 300, 280, 250]
+        PowerByPosition = [370, 320, 280, 150],
+        Rider = new RiderData { FTP = 300, Weight = 75 }
     },
     new RiderPowerPlan
     {
         Name = "Bob",
         PullDuration = TimeSpan.FromSeconds(45),
-        PowerByPosition = [330, 290, 270, 240]
+        PowerByPosition = [330, 290, 270, 240],
+        Rider = new RiderData { FTP = 280, Weight = 70 }
     },
     new RiderPowerPlan
     {
         Name = "Charlie",
         PullDuration = TimeSpan.FromSeconds(60),
-        PowerByPosition = [370, 320, 300, 270]
+        PowerByPosition = [370, 320, 300, 270],
+        Rider = new RiderData { FTP = 280, Weight = 80 }            
     },
     new RiderPowerPlan
     {
         Name = "Diana",
         PullDuration = TimeSpan.FromSeconds(90),
-        PowerByPosition = [340, 310, 290, 260]
+        PowerByPosition = [340, 310, 290, 260],
+        Rider = new RiderData { FTP = 290, Weight = 65 }
     },
     new RiderPowerPlan
     {
         Name = "Simone",
         PullDuration = TimeSpan.FromSeconds(45),
-        PowerByPosition = [280, 260, 230, 200]
+        PowerByPosition = [280, 260, 230, 200],
+        Rider = new RiderData { FTP = 260, Weight = 60 }
     },
     new RiderPowerPlan
     {
         Name = "Eve",
         PullDuration = TimeSpan.FromSeconds(40),
-        PowerByPosition = [310, 280, 250, 220]
+        PowerByPosition = [310, 280, 250, 220],
+        Rider = new RiderData { FTP = 270, Weight = 68 }
     }
 };
 
@@ -88,12 +94,14 @@ foreach (var (riderName, steps) in workouts)
         Console.Write($" {steps[i].DurationSeconds,-14}");
         
         // Color power based on intensity
-        var powerColor = steps[i].Power switch
+        var powerColor = steps[i].Intensity switch
         {
-            >= 350 => ConsoleColor.Red,
-            >= 300 => ConsoleColor.Yellow,
-            >= 250 => ConsoleColor.Cyan,
-            _ => ConsoleColor.Green
+            >= 1.18 => ConsoleColor.Red,
+            >= 1.05 => ConsoleColor.Magenta,
+            >= 0.90 => ConsoleColor.Yellow,
+            >= 0.75 => ConsoleColor.Green,
+            >= 0.60 => ConsoleColor.Blue,
+            _ => ConsoleColor.DarkGray
         };
         Console.ForegroundColor = powerColor;
         Console.WriteLine($" {steps[i].Power,-12}");
