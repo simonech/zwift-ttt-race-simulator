@@ -1,6 +1,7 @@
 using System.Text;
 using System.Xml;
 using System.IO;
+using System.Linq;
 using ZwiftTTTSim.Core.Model;
 
 namespace ZwiftTTTSim.Core.Services;
@@ -9,14 +10,19 @@ public class ZwoExporter
 {
     public static string GetWorkoutFileName(string riderName)
     {
+        ArgumentNullException.ThrowIfNull(riderName);
+        
         // Sanitize the rider name to create a valid filename
-        var invalidChars = Path.GetInvalidFileNameChars();
-        var sanitizedName = string.Concat(riderName.Select(c => invalidChars.Contains(c) ? '_' : c));
+        var invalidCharsSet = new HashSet<char>(Path.GetInvalidFileNameChars());
+        var sanitizedName = string.Concat(riderName.Select(c => invalidCharsSet.Contains(c) ? '_' : c));
         return $"{sanitizedName}_TTT_Workout.zwo";
     }
 
     public string ExportToZwo(string riderName, List<WorkoutStep> steps)
     {
+        ArgumentNullException.ThrowIfNull(riderName);
+        ArgumentNullException.ThrowIfNull(steps);
+        
         var settings = new XmlWriterSettings
         {
             Indent = true,
@@ -52,6 +58,9 @@ public class ZwoExporter
 
     public void ExportToFiles(Dictionary<string, List<WorkoutStep>> workouts, string outputDirectory)
     {
+        ArgumentNullException.ThrowIfNull(workouts);
+        ArgumentNullException.ThrowIfNull(outputDirectory);
+        
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);

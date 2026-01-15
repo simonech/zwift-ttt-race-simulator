@@ -284,4 +284,44 @@ public class ZwiftTTTSimTests
         var invalidChars = Path.GetInvalidFileNameChars();
         Assert.DoesNotContain(result, c => invalidChars.Contains(c));
     }
+
+    [Fact]
+    public void ZwoExporter_GetWorkoutFileName_ShouldThrowOnNullRiderName()
+    {
+        Assert.Throws<ArgumentNullException>(() => ZwoExporter.GetWorkoutFileName(null!));
+    }
+
+    [Fact]
+    public void ZwoExporter_ExportToZwo_ShouldThrowOnNullRiderName()
+    {
+        var exporter = new ZwoExporter();
+        var steps = new List<WorkoutStep> { new WorkoutStep { DurationSeconds = 30, Power = 350 } };
+        
+        Assert.Throws<ArgumentNullException>(() => exporter.ExportToZwo(null!, steps));
+    }
+
+    [Fact]
+    public void ZwoExporter_ExportToZwo_ShouldThrowOnNullSteps()
+    {
+        var exporter = new ZwoExporter();
+        
+        Assert.Throws<ArgumentNullException>(() => exporter.ExportToZwo("TestRider", null!));
+    }
+
+    [Fact]
+    public void ZwoExporter_ExportToFiles_ShouldThrowOnNullWorkouts()
+    {
+        var exporter = new ZwoExporter();
+        
+        Assert.Throws<ArgumentNullException>(() => exporter.ExportToFiles(null!, "output"));
+    }
+
+    [Fact]
+    public void ZwoExporter_ExportToFiles_ShouldThrowOnNullOutputDirectory()
+    {
+        var exporter = new ZwoExporter();
+        var workouts = new Dictionary<string, List<WorkoutStep>>();
+        
+        Assert.Throws<ArgumentNullException>(() => exporter.ExportToFiles(workouts, null!));
+    }
 }
