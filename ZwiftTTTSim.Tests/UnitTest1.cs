@@ -1,6 +1,6 @@
 ﻿namespace ZwiftTTTSim.Tests;
 
-public class UnitTest1
+public class ZwiftTTTSimTests
 {
     [Fact]
     public void Test1()
