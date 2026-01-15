@@ -54,6 +54,17 @@ public class ZwiftTTTSimTests
         Assert.Equal(expectedIntensity, intensity, 2);
     }
 
+    [Fact]
+    public void WorkoutStep_SetIntensity_ShouldThrowExceptionForZeroOrNegativeFTP()
+    {
+        // Arrange
+        var step = new WorkoutStep { Power = 250 };
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => step.SetIntensity(0));
+        Assert.Throws<ArgumentException>(() => step.SetIntensity(-100));
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(2)]

@@ -20,21 +20,21 @@ public static class TestData
                 Name = "Bob",
                 PullDuration = TimeSpan.FromSeconds(45),
                 PowerByPosition = new[] { 330, 290, 270, 240 },
-                Rider = new RiderData {  FTP = 280, Weight = 75 },
+                Rider = new RiderData { FTP = 280, Weight = 75 },
             },
             new RiderPowerPlan
             {
                 Name = "Charlie",
                 PullDuration = TimeSpan.FromSeconds(60),
                 PowerByPosition = new[] { 370, 320, 300, 270 },
-                Rider = new RiderData {  FTP = 320, Weight = 72 }
+                Rider = new RiderData { FTP = 320, Weight = 72 }
             },
             new RiderPowerPlan
             {
                 Name = "Diana",
                 PullDuration = TimeSpan.FromSeconds(90),
                 PowerByPosition = new[] { 340, 310, 290, 260 },
-                Rider = new RiderData {  FTP = 290, Weight = 68 }
+                Rider = new RiderData { FTP = 290, Weight = 68 }
             }
         };
     }
