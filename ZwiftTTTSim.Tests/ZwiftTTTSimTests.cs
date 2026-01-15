@@ -7,18 +7,34 @@ namespace ZwiftTTTSim.Tests;
 
 public class ZwiftTTTSimTests
 {
+    // MemberData providing power plan sets for team sizes 4, 6, and 8 with rotations 1..3
+    public static IEnumerable<object[]> PowerPlanSets()
+    {
+        yield return new object[] { TestData.GetSampleRiderPowerPlans(), 1 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans(), 2 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans(), 3 };
+
+        yield return new object[] { TestData.GetSampleRiderPowerPlans6(), 1 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans6(), 2 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans6(), 3 };
+
+        yield return new object[] { TestData.GetSampleRiderPowerPlans8(), 1 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans8(), 2 };
+        yield return new object[] { TestData.GetSampleRiderPowerPlans8(), 3 };
+    }
+
     [Fact]
     public void RiderData_ShouldHaveCorrectWKg()
     {
         // Arrange
         var riderData = new RiderData { FTP = 280, Weight = 85 }; // Example values
-        var expectedWKg = riderData.FTP / riderData.Weight; // Calculate expected WKg
+        var expectedWKg = 3.29; // Calculate expected WKg
 
         // Act
         var actualWKg = riderData.WKg;
 
         // Assert
-        Assert.Equal(expectedWKg, actualWKg);
+        Assert.Equal(expectedWKg, actualWKg, 2);
     }
 
     [Theory]
@@ -77,18 +93,16 @@ public class ZwiftTTTSimTests
         {
             var riderName = powerPlans[riderIndex].Name;
             var actualSteps = workouts[riderName];
-            int[] expectedPower =
-            {
-                powerPlans[riderIndex].PowerByPosition[(0+riderIndex)%powerPlans[riderIndex].PowerByPosition.Length],
-                powerPlans[riderIndex].PowerByPosition[(3+riderIndex)%powerPlans[riderIndex].PowerByPosition.Length],
-                powerPlans[riderIndex].PowerByPosition[(2+riderIndex)%powerPlans[riderIndex].PowerByPosition.Length],
-                powerPlans[riderIndex].PowerByPosition[(1+riderIndex)%powerPlans[riderIndex].PowerByPosition.Length]
-            };
+
             for (int stepIndex = 0; stepIndex < actualSteps.Count; stepIndex++)
             {
                 var pullingRiderIndex = stepIndex % powerPlans.Count;
-                //Console.WriteLine($"Step: {stepIndex}, Expected: {expectedPower[pullingRiderIndex]}, Actual: {actualSteps[stepIndex].Power}");
-                Assert.Equal(expectedPower[pullingRiderIndex], actualSteps[stepIndex].Power);
+                // Compute rider's position at this step relative to the pulling rider
+                var position = (riderIndex - pullingRiderIndex + powerPlans.Count) % powerPlans.Count;
+                var clampedIndex = Math.Min(position, powerPlans[riderIndex].PowerByPosition.Length - 1);
+                var expectedPower = powerPlans[riderIndex].PowerByPosition[clampedIndex];
+
+                Assert.Equal(expectedPower, actualSteps[stepIndex].Power);
             }
         }
     }
@@ -119,6 +133,42 @@ public class ZwiftTTTSimTests
                 var expectedDurationSeconds = (int)powerPlans[pullingRiderIndex].PullDuration.TotalSeconds;
 
                 Assert.Equal(expectedDurationSeconds, actualSteps[stepIndex].DurationSeconds);
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(PowerPlanSets))]
+    public void WorkoutCreator_ShouldSupportTeamsOfVariousSizes(List<RiderPowerPlan> powerPlans, int rotations)
+    {
+        var workoutCreator = new WorkoutCreator();
+        var expectedStepsCount = powerPlans.Count * rotations;
+
+        var workouts = workoutCreator.CreateWorkouts(powerPlans, rotations);
+
+        // Count checks
+        Assert.Equal(powerPlans.Count, workouts.Count);
+        foreach (var workout in workouts.Values)
+        {
+            Assert.Equal(expectedStepsCount, workout.Count);
+        }
+
+        // Duration and power checks
+        for (int riderIndex = 0; riderIndex < powerPlans.Count; riderIndex++)
+        {
+            var riderName = powerPlans[riderIndex].Name;
+            var actualSteps = workouts[riderName];
+
+            for (int stepIndex = 0; stepIndex < actualSteps.Count; stepIndex++)
+            {
+                var pullingRiderIndex = stepIndex % powerPlans.Count;
+                var expectedDurationSeconds = (int)powerPlans[pullingRiderIndex].PullDuration.TotalSeconds;
+                Assert.Equal(expectedDurationSeconds, actualSteps[stepIndex].DurationSeconds);
+
+                var position = (riderIndex - pullingRiderIndex + powerPlans.Count) % powerPlans.Count;
+                var clampedIndex = Math.Min(position, powerPlans[riderIndex].PowerByPosition.Length - 1);
+                var expectedPower = powerPlans[riderIndex].PowerByPosition[clampedIndex];
+                Assert.Equal(expectedPower, actualSteps[stepIndex].Power);
             }
         }
     }

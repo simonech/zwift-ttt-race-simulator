@@ -25,7 +25,8 @@ public class WorkoutCreator
                 var step = new WorkoutStep
                 {
                     DurationSeconds = durationSeconds,
-                    Power = powerPlans[i].PowerByPosition[i]
+                    // Clamp position index so positions beyond defined entries use the last value
+                    Power = powerPlans[i].PowerByPosition[Math.Min(i, powerPlans[i].PowerByPosition.Length - 1)]
                 };
                 workouts[riderName].Add(step);
             }
