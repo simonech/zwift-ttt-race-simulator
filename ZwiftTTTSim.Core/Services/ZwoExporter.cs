@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -43,8 +44,8 @@ public class ZwoExporter
             foreach (var step in steps)
             {
                 writer.WriteStartElement("SteadyState");
-                writer.WriteAttributeString("Duration", step.DurationSeconds.ToString());
-                writer.WriteAttributeString("Power", step.Power.ToString("F0"));
+                writer.WriteAttributeString("Duration", step.DurationSeconds.ToString(CultureInfo.InvariantCulture));
+                writer.WriteAttributeString("Power", step.Power.ToString("F0", CultureInfo.InvariantCulture));
                 writer.WriteEndElement(); // SteadyState
             }
             writer.WriteEndElement(); // workout
