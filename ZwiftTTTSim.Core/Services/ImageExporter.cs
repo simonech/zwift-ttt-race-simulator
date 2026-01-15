@@ -57,17 +57,15 @@ public class ImageExporter
         var powerRange = maxPower * PowerRangePaddingMultiplier;
 
         // Draw title
+        using var titleFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 24);
         using var titlePaint = new SKPaint
         {
             Color = SKColors.Black,
-            TextSize = 24,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+            IsAntialias = true
         };
         var titleText = $"TTT Workout - {riderName}";
-        var titleBounds = new SKRect();
-        titlePaint.MeasureText(titleText, ref titleBounds);
-        canvas.DrawText(titleText, (ChartWidth - titleBounds.Width) / 2, 30, titlePaint);
+        var titleWidth = titleFont.MeasureText(titleText);
+        canvas.DrawText(titleText, (ChartWidth - titleWidth) / 2, 30, titleFont, titlePaint);
 
         // Draw axes
         using var axisPaint = new SKPaint
@@ -83,36 +81,33 @@ public class ImageExporter
         canvas.DrawLine(chartLeft, chartBottom, chartRight, chartBottom, axisPaint);
 
         // Draw axis labels
+        using var labelFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var labelPaint = new SKPaint
         {
             Color = SKColors.Black,
-            TextSize = 12,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Arial")
+            IsAntialias = true
         };
 
         // Y-axis label (Power)
+        using var yLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 14);
         using var yLabelPaint = new SKPaint
         {
             Color = SKColors.Black,
-            TextSize = 14,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+            IsAntialias = true
         };
         canvas.Save();
         canvas.RotateDegrees(-90, 20, ChartHeight / 2);
-        canvas.DrawText("Power (W)", 20, ChartHeight / 2, yLabelPaint);
+        canvas.DrawText("Power (W)", 20, ChartHeight / 2, yLabelFont, yLabelPaint);
         canvas.Restore();
 
         // X-axis label (Time)
+        using var xLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 14);
         using var xLabelPaint = new SKPaint
         {
             Color = SKColors.Black,
-            TextSize = 14,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold)
+            IsAntialias = true
         };
-        canvas.DrawText("Time (s)", ChartWidth / 2 - 30, ChartHeight - 10, xLabelPaint);
+        canvas.DrawText("Time (s)", ChartWidth / 2 - 30, ChartHeight - 10, xLabelFont, xLabelPaint);
 
         // Draw Y-axis ticks and labels (power)
         for (int i = 0; i <= PowerAxisSteps; i++)
@@ -125,9 +120,9 @@ public class ImageExporter
             
             // Label
             var powerText = ((int)power).ToString(CultureInfo.InvariantCulture);
-            var textBounds = new SKRect();
-            labelPaint.MeasureText(powerText, ref textBounds);
-            canvas.DrawText(powerText, chartLeft - textBounds.Width - 10, y + textBounds.Height / 2, labelPaint);
+            var textWidth = labelFont.MeasureText(powerText);
+            var textHeight = labelFont.Size; // Approximate height from font size
+            canvas.DrawText(powerText, chartLeft - textWidth - 10, y + textHeight / 2, labelFont, labelPaint);
         }
 
         // Draw bars
@@ -192,9 +187,8 @@ public class ImageExporter
             
             // Label
             var timeText = ((int)time).ToString(CultureInfo.InvariantCulture);
-            var textBounds = new SKRect();
-            labelPaint.MeasureText(timeText, ref textBounds);
-            canvas.DrawText(timeText, x - textBounds.Width / 2, chartBottom + 20, labelPaint);
+            var textWidth = labelFont.MeasureText(timeText);
+            canvas.DrawText(timeText, x - textWidth / 2, chartBottom + 20, labelFont, labelPaint);
         }
 
         // Draw legend
@@ -203,12 +197,11 @@ public class ImageExporter
         var legendBoxSize = 15;
         var legendSpacing = 25;
 
+        using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var legendTextPaint = new SKPaint
         {
             Color = SKColors.Black,
-            TextSize = 12,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName("Arial")
+            IsAntialias = true
         };
 
         var legendItems = new[]
@@ -242,7 +235,7 @@ public class ImageExporter
             canvas.DrawRect(legendX, y, legendBoxSize, legendBoxSize, legendOutlinePaint);
             
             // Draw text
-            canvas.DrawText(item.Text, legendX + legendBoxSize + 5, y + legendBoxSize - 2, legendTextPaint);
+            canvas.DrawText(item.Text, legendX + legendBoxSize + 5, y + legendBoxSize - 2, legendTextFont, legendTextPaint);
         }
 
         // Encode to PNG
