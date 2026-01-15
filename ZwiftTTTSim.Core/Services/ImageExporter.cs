@@ -136,7 +136,7 @@ public class ImageExporter
             var barWidth = (float)((chartAreaWidth * step.DurationSeconds) / totalDuration);
             var barHeight = (float)((chartAreaHeight * step.Power) / powerRange);
             
-            // Determine bar color based on position
+            // Determine bar color based on intensity zone
             var barColor = step.Intensity switch
             {
                 >= 1.18 => new SKColor(220, 50, 50),      // Red for Anaerobic
