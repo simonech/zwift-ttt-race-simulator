@@ -10,14 +10,18 @@ public class ImageExporter
     private const int ChartHeight = 600;
     private const int Padding = 60;
     private const int AxisPadding = 40;
+    private const double PowerRangePaddingMultiplier = 1.1;
+    private const int PowerAxisSteps = 5;
+    private const int TimeAxisSteps = 10;
+
+    private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
     public static string GetWorkoutImageFileName(string riderName)
     {
         ArgumentNullException.ThrowIfNull(riderName);
         
         // Sanitize the rider name to create a valid filename
-        var invalidCharsSet = new HashSet<char>(Path.GetInvalidFileNameChars());
-        var sanitizedName = string.Concat(riderName.Select(c => invalidCharsSet.Contains(c) ? '_' : c));
+        var sanitizedName = string.Concat(riderName.Select(c => InvalidFileNameChars.Contains(c) ? '_' : c));
         return $"{sanitizedName}_TTT_Workout.png";
     }
 
@@ -50,7 +54,7 @@ public class ImageExporter
         var totalDuration = steps.Sum(s => s.DurationSeconds);
 
         // Add some padding to max power for better visualization
-        var powerRange = maxPower * 1.1;
+        var powerRange = maxPower * PowerRangePaddingMultiplier;
 
         // Draw title
         using var titlePaint = new SKPaint
@@ -111,11 +115,10 @@ public class ImageExporter
         canvas.DrawText("Time (s)", ChartWidth / 2 - 30, ChartHeight - 10, xLabelPaint);
 
         // Draw Y-axis ticks and labels (power)
-        var powerSteps = 5;
-        for (int i = 0; i <= powerSteps; i++)
+        for (int i = 0; i <= PowerAxisSteps; i++)
         {
-            var power = (powerRange / powerSteps) * i;
-            var y = (float)(chartBottom - (chartAreaHeight * i / powerSteps));
+            var power = (powerRange / PowerAxisSteps) * i;
+            var y = (float)(chartBottom - (chartAreaHeight * i / PowerAxisSteps));
             
             // Tick mark
             canvas.DrawLine(chartLeft - 5, y, chartLeft, y, axisPaint);
@@ -179,11 +182,10 @@ public class ImageExporter
         }
 
         // Draw X-axis ticks and labels (time)
-        var timeSteps = 10;
-        for (int i = 0; i <= timeSteps; i++)
+        for (int i = 0; i <= TimeAxisSteps; i++)
         {
-            var time = (totalDuration / timeSteps) * i;
-            var x = chartLeft + (chartAreaWidth * i / timeSteps);
+            var time = (totalDuration / TimeAxisSteps) * i;
+            var x = chartLeft + (chartAreaWidth * i / TimeAxisSteps);
             
             // Tick mark
             canvas.DrawLine(x, chartBottom, x, chartBottom + 5, axisPaint);
