@@ -6,6 +6,8 @@ While races are held on Zwift, the generated workouts can be used on **any cycli
 
 ---
 
+## This is still a work in progress
+
 ## 🚴 Motivation
 
 Team Time Trial racing is not just about FTP — it’s about:
@@ -118,20 +120,6 @@ The current implementation focuses on **basic rotation simulation**. Planned enh
 - Competitive TTT teams (ZRL, WTRL, private leagues)
 - Riders who want to better understand their role in a team effort
 - Developers interested in cycling simulation tools
-
----
-
-## 🤝 Contributions
-
-Contributions are welcome!
-
-Whether it’s:
-- improving the simulation model
-- adding exporters
-- improving test coverage
-- refining documentation
-
-Feel free to open an issue or submit a pull request.
 
 ---
 
