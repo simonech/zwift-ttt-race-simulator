@@ -15,7 +15,7 @@
         "ms-dotnettools.vscode-dotnet-runtime"
       ],
       "settings": {
-        "dotnet.defaultSolution": "ZwiftTTTSim.sln"
+        "dotnet.defaultSolution": "ZwiftTTTSim.slnx"
       }
     }
   },
