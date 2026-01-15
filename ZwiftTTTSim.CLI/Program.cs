@@ -23,7 +23,7 @@ var powerPlans = new List<RiderPowerPlan>
         Name = "Charlie",
         PullDuration = TimeSpan.FromSeconds(60),
         PowerByPosition = [370, 320, 300, 270],
-        Rider = new RiderData { FTP = 280, Weight = 80 }            
+        Rider = new RiderData { FTP = 280, Weight = 80 }
     },
     new RiderPowerPlan
     {
@@ -75,12 +75,12 @@ foreach (var (riderName, steps) in workouts)
     Console.WriteLine($"{"Step",-6} {"Position",-10} {"Duration (s)",-14} {"Power (W)",-12}");
     Console.WriteLine(new string('─', 45));
     Console.ResetColor();
-    
+
     for (int i = 0; i < steps.Count; i++)
     {
         var pullingRiderIndex = i % powerPlans.Count;
         var position = (riderIndex - pullingRiderIndex + powerPlans.Count) % powerPlans.Count + 1;
-        
+
         // Color position based on effort (1=pulling hard, 2-3=moderate, 4+=easy)
         Console.Write($"{i + 1,-6} ");
         Console.ForegroundColor = position switch
@@ -92,7 +92,7 @@ foreach (var (riderName, steps) in workouts)
         Console.Write($"{position,-10}");
         Console.ResetColor();
         Console.Write($" {steps[i].DurationSeconds,-14}");
-        
+
         // Color power based on intensity
         var powerColor = steps[i].Intensity switch
         {
@@ -107,7 +107,7 @@ foreach (var (riderName, steps) in workouts)
         Console.WriteLine($" {steps[i].Power,-12}");
         Console.ResetColor();
     }
-    
+
     riderIndex++;
 }
 

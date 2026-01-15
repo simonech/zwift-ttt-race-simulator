@@ -139,12 +139,12 @@ public class ImageExporter
             // Determine bar color based on position
             var barColor = step.Intensity switch
             {
-                >= 1.18 => new SKColor(220, 50, 50),      // Red for high intensity
-                >= 1.05 => new SKColor(255, 165, 0),      // Orange for high-moderately high intensity
-                >= 0.90 => new SKColor(255, 200, 0),      // Yellow for moderate intensity
-                >= 0.75 => new SKColor(50, 180, 50),      // Green for moderate-low intensity
-                >= 0.60 => new SKColor(0, 0, 255),        // Blue for low intensity
-                _ => new SKColor(105, 105, 105)           // DarkGray for very low intensity
+                >= 1.18 => new SKColor(220, 50, 50),      // Red for Anaerobic
+                >= 1.05 => new SKColor(255, 165, 0),      // Orange for VO2 Max
+                >= 0.90 => new SKColor(255, 200, 0),      // Yellow for Threshold
+                >= 0.75 => new SKColor(50, 180, 50),      // Green for Tempo
+                >= 0.60 => new SKColor(0, 0, 255),        // Blue for Endurance
+                _ => new SKColor(105, 105, 105)           // DarkGray for Recovery
             };
 
             // Draw bar
@@ -208,12 +208,12 @@ public class ImageExporter
 
         var legendItems = new[]
         {
-            (Color: new SKColor(220, 50, 50), Text: "High Intensity (>= 1.18)"),
-            (Color: new SKColor(255, 165, 0), Text: "High-Moderately High Intensity (>= 1.05)"),
-            (Color: new SKColor(255, 200, 0), Text: "Moderate Intensity (>= 0.90)"),
-            (Color: new SKColor(50, 180, 50), Text: "Moderate-Low Intensity (>= 0.75)"),
-            (Color: new SKColor(0, 0, 255), Text: "Low Intensity (>= 0.60)"),
-            (Color: new SKColor(105, 105, 105), Text: "Very Low Intensity (< 0.60)")
+            (Color: new SKColor(220, 50, 50), Text: "Anaerobic (>= 1.18)"),
+            (Color: new SKColor(255, 165, 0), Text: "VO2 Max (>= 1.05)"),
+            (Color: new SKColor(255, 200, 0), Text: "Threshold (>= 0.90)"),
+            (Color: new SKColor(50, 180, 50), Text: "Tempo (>= 0.75)"),
+            (Color: new SKColor(0, 0, 255), Text: "Endurance (>= 0.60)"),
+            (Color: new SKColor(105, 105, 105), Text: "Recovery (< 0.60)")
         };
 
         for (int i = 0; i < legendItems.Length; i++)
