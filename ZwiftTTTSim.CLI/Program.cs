@@ -105,3 +105,19 @@ foreach (var (riderName, steps) in workouts)
 
 Console.WriteLine();
 
+// Export workouts to ZWO files
+var exporter = new ZwoExporter();
+var outputDirectory = "workouts";
+exporter.ExportToFiles(workouts, outputDirectory);
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"\n✅ Workouts exported to '{outputDirectory}' directory");
+Console.ResetColor();
+Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
+foreach (var riderName in workouts.Keys)
+{
+    var fileName = $"{riderName.Replace(" ", "_")}_TTT_Workout.zwo";
+    Console.WriteLine($"   - {fileName}");
+}
+Console.WriteLine();
+

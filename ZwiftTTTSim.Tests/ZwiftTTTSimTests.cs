@@ -172,4 +172,90 @@ public class ZwiftTTTSimTests
             }
         }
     }
+
+    [Fact]
+    public void ZwoExporter_ShouldGenerateValidXml()
+    {
+        // Arrange
+        var exporter = new ZwoExporter();
+        var steps = new List<WorkoutStep>
+        {
+            new WorkoutStep { DurationSeconds = 30, Power = 350 },
+            new WorkoutStep { DurationSeconds = 45, Power = 250 },
+            new WorkoutStep { DurationSeconds = 60, Power = 270 }
+        };
+
+        // Act
+        var result = exporter.ExportToZwo("TestRider", steps);
+
+        // Assert
+        Assert.NotEmpty(result);
+        Assert.Contains("<?xml version=", result);
+        Assert.Contains("<workout_file>", result);
+        Assert.Contains("<name>TTT simulation for TestRider</name>", result);
+        Assert.Contains("<workout>", result);
+        Assert.Contains("</workout>", result);
+        Assert.Contains("</workout_file>", result);
+    }
+
+    [Fact]
+    public void ZwoExporter_ShouldIncludeAllSteps()
+    {
+        // Arrange
+        var exporter = new ZwoExporter();
+        var steps = new List<WorkoutStep>
+        {
+            new WorkoutStep { DurationSeconds = 30, Power = 350 },
+            new WorkoutStep { DurationSeconds = 45, Power = 250 },
+            new WorkoutStep { DurationSeconds = 60, Power = 270 }
+        };
+
+        // Act
+        var result = exporter.ExportToZwo("TestRider", steps);
+
+        // Assert
+        Assert.Contains("<SteadyState Duration=\"30\" Power=\"350\"", result);
+        Assert.Contains("<SteadyState Duration=\"45\" Power=\"250\"", result);
+        Assert.Contains("<SteadyState Duration=\"60\" Power=\"270\"", result);
+    }
+
+    [Fact]
+    public void ZwoExporter_ShouldCreateFilesForAllRiders()
+    {
+        // Arrange
+        var exporter = new ZwoExporter();
+        var workouts = new Dictionary<string, List<WorkoutStep>>
+        {
+            ["Alice"] = new List<WorkoutStep>
+            {
+                new WorkoutStep { DurationSeconds = 30, Power = 350 }
+            },
+            ["Bob"] = new List<WorkoutStep>
+            {
+                new WorkoutStep { DurationSeconds = 45, Power = 330 }
+            }
+        };
+        var outputDirectory = Path.Combine(Path.GetTempPath(), $"test_workouts_{Guid.NewGuid()}");
+
+        try
+        {
+            // Act
+            exporter.ExportToFiles(workouts, outputDirectory);
+
+            // Assert
+            Assert.True(Directory.Exists(outputDirectory));
+            var files = Directory.GetFiles(outputDirectory, "*.zwo");
+            Assert.Equal(2, files.Length);
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "Alice_TTT_Workout.zwo")));
+            Assert.True(File.Exists(Path.Combine(outputDirectory, "Bob_TTT_Workout.zwo")));
+        }
+        finally
+        {
+            // Cleanup
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+        }
+    }
 }
