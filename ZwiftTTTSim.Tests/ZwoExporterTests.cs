@@ -95,6 +95,10 @@ public class ZwoExporterTests
     [Theory]
     [InlineData("Alice", "Alice_TTT_Workout.zwo")]
     [InlineData("Bob Smith", "Bob Smith_TTT_Workout.zwo")]
+    [InlineData("André", "André_TTT_Workout.zwo")]
+    [InlineData("Øyvind", "Øyvind_TTT_Workout.zwo")]
+    [InlineData("Petr Šimon", "Petr Šimon_TTT_Workout.zwo")]
+    [InlineData("François", "François_TTT_Workout.zwo")]
     public void ZwoExporter_GetWorkoutFileName_ShouldSanitizeInvalidCharacters(string riderName, string expectedFileName)
     {
         // Act
