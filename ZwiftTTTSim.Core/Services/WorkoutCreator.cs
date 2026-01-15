@@ -28,6 +28,7 @@ public class WorkoutCreator
                     // Clamp position index so positions beyond defined entries use the last value
                     Power = powerPlans[i].PowerByPosition[Math.Min(i, powerPlans[i].PowerByPosition.Length - 1)]
                 };
+                step.SetIntensity(powerPlans[i].Rider.FTP);
                 workouts[riderName].Add(step);
             }
             powerPlans.Add(powerPlans[0]);

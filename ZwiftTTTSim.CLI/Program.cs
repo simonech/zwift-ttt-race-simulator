@@ -94,12 +94,14 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
                 Console.Write($" {steps[i].DurationSeconds,-14}");
                 
                 // Color power based on intensity
-                var powerColor = steps[i].Power switch
+                var powerColor = steps[i].Intensity switch
                 {
-                    >= 350 => ConsoleColor.Red,
-                    >= 300 => ConsoleColor.Yellow,
-                    >= 250 => ConsoleColor.Cyan,
-                    _ => ConsoleColor.Green
+                    >= 1.18 => ConsoleColor.Red,
+                    >= 1.05 => ConsoleColor.Magenta,
+                    >= 0.90 => ConsoleColor.Yellow,
+                    >= 0.75 => ConsoleColor.Green,
+                    >= 0.60 => ConsoleColor.Blue,
+                    _ => ConsoleColor.DarkGray
                 };
                 Console.ForegroundColor = powerColor;
                 Console.WriteLine($" {steps[i].Power,-12}");
