@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ZwiftTTTSim.Core\ZwiftTTTSim.Core.csproj" />
+  <Project Path="ZwiftTTTSim.Tests\ZwiftTTTSim.Tests.csproj" />
+  <Project Path="ZwiftTTTSim.CLI\ZwiftTTTSim.CLI.csproj" />
+</Solution>
