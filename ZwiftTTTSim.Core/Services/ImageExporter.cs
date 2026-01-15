@@ -136,16 +136,15 @@ public class ImageExporter
             var barWidth = (float)((chartAreaWidth * step.DurationSeconds) / totalDuration);
             var barHeight = (float)((chartAreaHeight * step.Power) / powerRange);
             
-            // Calculate position in rotation (1st, 2nd, 3rd, 4th+)
-            var pullingRiderIndex = i % totalRiders;
-            var position = (riderIndex - pullingRiderIndex + totalRiders) % totalRiders + 1;
-            
-            // Determine bar color based on position
-            var barColor = position switch
+            // Determine bar color based on intensity zone
+            var barColor = step.Intensity switch
             {
-                1 => new SKColor(220, 50, 50),      // Red for 1st position
-                2 or 3 => new SKColor(255, 200, 0), // Yellow for 2nd and 3rd
-                _ => new SKColor(50, 180, 50)       // Green for 4th+
+                >= 1.18 => new SKColor(220, 50, 50),      // Red for Anaerobic
+                >= 1.05 => new SKColor(255, 165, 0),      // Orange for VO2 Max
+                >= 0.90 => new SKColor(255, 200, 0),      // Yellow for Threshold
+                >= 0.75 => new SKColor(50, 180, 50),      // Green for Tempo
+                >= 0.60 => new SKColor(0, 0, 255),        // Blue for Endurance
+                _ => new SKColor(105, 105, 105)           // DarkGray for Recovery
             };
 
             // Draw bar
@@ -186,7 +185,10 @@ public class ImageExporter
             canvas.DrawLine(x, chartBottom, x, chartBottom + 5, axisPaint);
             
             // Label
-            var timeText = ((int)time).ToString(CultureInfo.InvariantCulture);
+            var minutes = time / 60;
+            var seconds = time % 60;
+            
+            var timeText = $"{minutes:D2}:{seconds:D2}";
             var textWidth = labelFont.MeasureText(timeText);
             canvas.DrawText(timeText, x - textWidth / 2, chartBottom + 20, labelFont, labelPaint);
         }
@@ -206,9 +208,12 @@ public class ImageExporter
 
         var legendItems = new[]
         {
-            (Color: new SKColor(220, 50, 50), Text: "1st Position"),
-            (Color: new SKColor(255, 200, 0), Text: "2nd-3rd Position"),
-            (Color: new SKColor(50, 180, 50), Text: "4th+ Position")
+            (Color: new SKColor(220, 50, 50), Text: "Anaerobic (>= 1.18)"),
+            (Color: new SKColor(255, 165, 0), Text: "VO2 Max (>= 1.05)"),
+            (Color: new SKColor(255, 200, 0), Text: "Threshold (>= 0.90)"),
+            (Color: new SKColor(50, 180, 50), Text: "Tempo (>= 0.75)"),
+            (Color: new SKColor(0, 0, 255), Text: "Endurance (>= 0.60)"),
+            (Color: new SKColor(105, 105, 105), Text: "Recovery (< 0.60)")
         };
 
         for (int i = 0; i < legendItems.Length; i++)

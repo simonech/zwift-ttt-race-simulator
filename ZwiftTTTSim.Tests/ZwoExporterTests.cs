@@ -38,18 +38,18 @@ public class ZwoExporterTests
         var exporter = new ZwoExporter();
         var steps = new List<WorkoutStep>
         {
-            new WorkoutStep { DurationSeconds = 30, Power = 350 },
-            new WorkoutStep { DurationSeconds = 45, Power = 250 },
-            new WorkoutStep { DurationSeconds = 60, Power = 270 }
+            new WorkoutStep { DurationSeconds = 30, Intensity = 1.21 },
+            new WorkoutStep { DurationSeconds = 45, Intensity = 0.91 },
+            new WorkoutStep { DurationSeconds = 60, Intensity = 0.98 }
         };
 
         // Act
         var result = exporter.ExportToZwo("TestRider", steps);
 
         // Assert
-        Assert.Contains("<SteadyState Duration=\"30\" Power=\"350\"", result);
-        Assert.Contains("<SteadyState Duration=\"45\" Power=\"250\"", result);
-        Assert.Contains("<SteadyState Duration=\"60\" Power=\"270\"", result);
+        Assert.Contains("<SteadyState Duration=\"30\" Power=\"1.21\"", result);
+        Assert.Contains("<SteadyState Duration=\"45\" Power=\"0.91\"", result);
+        Assert.Contains("<SteadyState Duration=\"60\" Power=\"0.98\"", result);
     }
 
     [Fact]
@@ -61,11 +61,11 @@ public class ZwoExporterTests
         {
             ["Alice"] = new List<WorkoutStep>
             {
-                new WorkoutStep { DurationSeconds = 30, Power = 350 }
+                new WorkoutStep { DurationSeconds = 30, Intensity = 1.21 }
             },
             ["Bob"] = new List<WorkoutStep>
             {
-                new WorkoutStep { DurationSeconds = 45, Power = 330 }
+                new WorkoutStep { DurationSeconds = 45, Intensity = 0.91 }
             }
         };
         var outputDirectory = Path.Combine(Path.GetTempPath(), $"test_workouts_{Guid.NewGuid()}");
@@ -132,7 +132,7 @@ public class ZwoExporterTests
     public void ZwoExporter_ExportToZwo_ShouldThrowOnNullRiderName()
     {
         var exporter = new ZwoExporter();
-        var steps = new List<WorkoutStep> { new WorkoutStep { DurationSeconds = 30, Power = 350 } };
+        var steps = new List<WorkoutStep> { new WorkoutStep { DurationSeconds = 30, Intensity = 1.21 } };
         
         Assert.Throws<ArgumentNullException>(() => exporter.ExportToZwo(null!, steps));
     }
