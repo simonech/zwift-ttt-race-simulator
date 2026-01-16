@@ -16,6 +16,10 @@ public static class Helpers
     /// <returns>The position of the rider in the rotation.</returns>
     public static int GetRotationPosition(int riderIndex, int pullingRiderIndex, int totalRiders)
     {
+        if (totalRiders <= 0)
+        {
+            throw new System.ArgumentOutOfRangeException(nameof(totalRiders), "totalRiders must be greater than 0.");
+        }
         return (riderIndex - pullingRiderIndex + totalRiders) % totalRiders;
     }
 }
