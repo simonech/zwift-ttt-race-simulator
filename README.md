@@ -116,10 +116,14 @@ In practice, the input data can be:
 The visualization shows:
 - **X-axis**: Time (proportional to interval duration)
 - **Y-axis**: Power output in watts
-- **Color coding**: 
-  - 🔴 Red: 1st position (pulling hard)
-  - 🟡 Yellow: 2nd-3rd position (moderate effort)
-  - 🟢 Green: 4th+ position (drafting)
+- **FTP Line**: Red dashed horizontal line showing the rider's Functional Threshold Power
+- **Color coding** (based on intensity relative to FTP): 
+  - 🔴 Red: Anaerobic (≥ 1.18 × FTP)
+  - 🟠 Orange: VO2 Max (≥ 1.05 × FTP)
+  - 🟡 Yellow: Threshold (≥ 0.90 × FTP)
+  - 🟢 Green: Tempo (≥ 0.75 × FTP)
+  - 🔵 Blue: Endurance (≥ 0.60 × FTP)
+  - ⚫ Gray: Recovery (< 0.60 × FTP)
 
 ---
 

@@ -129,7 +129,7 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
 
         // Export workout images
         var imageExporter = new ImageExporter();
-        imageExporter.ExportToFiles(workouts, outputFolder, powerPlans.Count);
+        imageExporter.ExportToFiles(workouts, outputFolder, powerPlans.Count, powerPlans);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"\n✅ Workout images exported to '{outputFolder}' directory");
