@@ -13,6 +13,7 @@ public class ImageExporter
     private const double PowerRangePaddingMultiplier = 1.1;
     private const int PowerAxisSteps = 5;
     private const int TimeAxisSteps = 10;
+    private const int LegendTopMargin = 45;
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
@@ -175,8 +176,8 @@ public class ImageExporter
             currentX += barWidth;
         }
 
-        // Draw FTP horizontal line if FTP is provided
-        if (ftp > 0)
+        // Draw FTP horizontal line if FTP is provided and within visible range
+        if (ftp > 0 && ftp <= powerRange)
         {
             var ftpY = (float)(chartBottom - (chartAreaHeight * ftp / powerRange));
             
@@ -225,7 +226,7 @@ public class ImageExporter
         var legendSpacing = 25;
         var legendItemsPerRow = 3;
         var legendColumnWidth = 200;
-        var legendStartY = chartBottom + 45;
+        var legendStartY = chartBottom + LegendTopMargin;
 
         using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var legendTextPaint = new SKPaint
