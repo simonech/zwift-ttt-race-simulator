@@ -13,6 +13,7 @@ public class ImageExporter
     private const double PowerRangePaddingMultiplier = 1.1;
     private const int PowerAxisSteps = 5;
     private const int TimeAxisSteps = 10;
+    private const int LegendTopMargin = 45;
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
@@ -25,7 +26,7 @@ public class ImageExporter
         return $"{sanitizedName}_TTT_Workout.png";
     }
 
-    public byte[] ExportToImage(string riderName, List<WorkoutStep> steps, int riderIndex, int totalRiders)
+    public byte[] ExportToImage(string riderName, List<WorkoutStep> steps, int riderIndex, int totalRiders, double ftp = 0)
     {
         ArgumentNullException.ThrowIfNull(riderName);
         ArgumentNullException.ThrowIfNull(steps);
@@ -175,6 +176,33 @@ public class ImageExporter
             currentX += barWidth;
         }
 
+        // Draw FTP horizontal line if FTP is provided and within visible range
+        if (ftp > 0 && ftp <= powerRange)
+        {
+            var ftpY = (float)(chartBottom - (chartAreaHeight * ftp / powerRange));
+            
+            // Draw dashed line at FTP
+            using var ftpLinePaint = new SKPaint
+            {
+                Color = SKColors.Red,
+                StrokeWidth = 2,
+                IsAntialias = true,
+                PathEffect = SKPathEffect.CreateDash(new float[] { 10, 5 }, 0)
+            };
+            canvas.DrawLine(chartLeft, ftpY, chartRight, ftpY, ftpLinePaint);
+            
+            // Draw FTP label
+            using var ftpLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 12);
+            using var ftpLabelPaint = new SKPaint
+            {
+                Color = SKColors.Red,
+                IsAntialias = true
+            };
+            var ftpText = $"FTP: {Math.Round(ftp):F0}W";
+            var ftpTextWidth = ftpLabelFont.MeasureText(ftpText);
+            canvas.DrawText(ftpText, chartRight - ftpTextWidth - 10, ftpY - 5, ftpLabelFont, ftpLabelPaint);
+        }
+
         // Draw X-axis ticks and labels (time)
         for (int i = 0; i <= TimeAxisSteps; i++)
         {
@@ -193,11 +221,12 @@ public class ImageExporter
             canvas.DrawText(timeText, x - textWidth / 2, chartBottom + 20, labelFont, labelPaint);
         }
 
-        // Draw legend
-        var legendX = chartRight - 120;
-        var legendY = chartTop + 20;
+        // Draw legend at the bottom
         var legendBoxSize = 15;
         var legendSpacing = 25;
+        var legendItemsPerRow = 3;
+        var legendColumnWidth = 200;
+        var legendStartY = chartBottom + LegendTopMargin;
 
         using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var legendTextPaint = new SKPaint
@@ -219,7 +248,10 @@ public class ImageExporter
         for (int i = 0; i < legendItems.Length; i++)
         {
             var item = legendItems[i];
-            var y = legendY + (i * legendSpacing);
+            var row = i / legendItemsPerRow;
+            var col = i % legendItemsPerRow;
+            var legendX = chartLeft + (col * legendColumnWidth);
+            var y = legendStartY + (row * legendSpacing);
             
             // Draw color box
             using var legendBoxPaint = new SKPaint
@@ -249,7 +281,7 @@ public class ImageExporter
         return data.ToArray();
     }
 
-    public void ExportToFiles(Dictionary<string, List<WorkoutStep>> workouts, string outputDirectory, int totalRiders)
+    public void ExportToFiles(Dictionary<string, List<WorkoutStep>> workouts, string outputDirectory, int totalRiders, List<RiderPowerPlan>? powerPlans = null)
     {
         ArgumentNullException.ThrowIfNull(workouts);
         ArgumentNullException.ThrowIfNull(outputDirectory);
@@ -259,10 +291,14 @@ public class ImageExporter
             Directory.CreateDirectory(outputDirectory);
         }
 
+        // Create dictionary lookup for better performance
+        var ftpLookup = powerPlans?.ToDictionary(p => p.Name, p => p.Rider.FTP) ?? new Dictionary<string, double>();
+
         var riderIndex = 0;
         foreach (var (riderName, steps) in workouts)
         {
-            var imageData = ExportToImage(riderName, steps, riderIndex, totalRiders);
+            var ftp = ftpLookup.TryGetValue(riderName, out var ftpValue) ? ftpValue : 0;
+            var imageData = ExportToImage(riderName, steps, riderIndex, totalRiders, ftp);
             var fileName = GetWorkoutImageFileName(riderName);
             var filePath = Path.Combine(outputDirectory, fileName);
             File.WriteAllBytes(filePath, imageData);
