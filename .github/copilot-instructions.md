@@ -1,42 +1,69 @@
 # Coding guidelines for Zwift TTT race simulator
 
 ---
-description: This file provides coding guidelines for agents contributing to the Zwift TTT race simulator project.
+description: Comprehensive coding guidelines and architecture patterns for AI agents contributing to the Zwift TTT race simulator project.
 applyTo: **/*.cs
 ---
 
-When contributing to the Zwift TTT race simulator project, please adhere to the following coding guidelines: 
+## 🏗️ Architecture Overview
 
-1. **Naming Conventions**:
-   - Use PascalCase for class names, method names, and properties.
-   - Use camelCase for local variables and method parameters.
-   - Use meaningful and descriptive names that convey the purpose of the variable, method, or class.
-2. **Code Structure**:
-   - Organize code into appropriate namespaces that reflect the project structure.
-   - Group related methods and properties together within classes.
-   - Keep methods focused on a single task; if a method exceeds 20 lines, consider refactoring it into smaller methods.
-   - **One class per file**: Never put multiple classes in a single file. Each class must have its own file with a name matching the class name (e.g., `RiderData.cs` for the `RiderData` class, `RiderDataTests.cs` for the `RiderDataTests` test class).
-   - Never use more than one namespace per file.
-   - Never use regions to collapse code.
-   - Use file scoped namespaces. Never use block scoped namespaces.
-3. **Comments and Documentation**:
-   - Use XML documentation comments for public methods and classes to describe their purpose, parameters, and return values.
-   - Add inline comments to explain complex logic or decisions in the code.
-   - Avoid redundant comments that do not add value or explain the code.
-4. **Error Handling**:
-   - Use exceptions for error handling and provide meaningful error messages.
-   - Avoid using generic exceptions; create custom exception classes when necessary.
-5. **Testing**:
-   - Tests are written using xUnit framework.
-   - Write unit tests for all public methods and critical logic paths.
-   - Use descriptive names for test methods that indicate the scenario being tested.
-   - Ensure tests are independent and can be run in any order.
-6. **Performance**:
-   - Optimize code for performance where necessary, especially in simulation logic.
-   - Avoid premature optimization; focus on readability and maintainability first. 
-7. **Version Control**:
-   - Commit changes with clear and descriptive messages.
-   - Follow branching strategies that facilitate collaboration and code review.
+This project generates **one workout file per rider** simulating a Team Time Trial rotation. The data flow is:
 
+**CSV Input** → **CsvParser** (parse rider data) → **WorkoutCreator** (simulate rotation) → **ZwoExporter** / **ImageExporter** (output)
 
-By following these guidelines, contributors can help maintain a high standard of code quality and ensure the project remains maintainable and extensible.
+### Key Components
+
+- **Model layer** (`ZwiftTTTSim.Core/Model/`): Data structures for rider state and workouts
+  - `RiderPowerPlan`: Encodes a rider's pull duration and power targets for each rotation position (1st=pulling, 2nd, 3rd, 4th+)
+  - `WorkoutStep`: Duration + power pair representing a single interval in a rider's workout
+  - `RiderData`: Rider metadata (FTP, weight) used to calculate intensity as power/FTP ratio
+  
+- **Services layer** (`ZwiftTTTSim.Core/Services/`): Business logic
+  - `WorkoutCreator`: **Core simulation logic** - rotates riders through positions, assigning power targets per position per step
+  - `CsvParser`: Parses rider input (7 fields: name, weight, FTP, pull duration, then 4 power values for positions 1-4+)
+  - Exporters: Generate output files (ZWO XML workouts, PNG visualizations)
+
+### Critical Pattern: Position-Based Power Assignment
+
+`WorkoutCreator.CreateWorkouts()` rotates riders through a paceline, moving the pull leader to the back each rotation. **Critically**, each rider's power for each step is determined by their current position via `GetPowerByPosition(position)` — not by who they're following. See `RiderPowerPlanTests.cs` for position lookups beyond position 4 returning the last defined power value.
+
+## Coding Standards
+
+### Naming & Structure
+
+- **PascalCase** for classes/methods/properties; **camelCase** for locals/parameters
+- **One class per file** matching the class name (`RiderData.cs`, not grouped files)
+- **File-scoped namespaces** only; never use block-scoped
+- No regions; keep methods focused (~20 line max before refactoring)
+
+### Documentation & Testing
+
+- **XML doc comments** for all public members describing purpose, parameters, returns
+- **xUnit framework** for tests; use descriptive test names indicating scenario
+- Write tests for all public methods and critical paths (e.g., rotation logic edge cases, position lookups beyond 4th rider)
+- Tests must be independent and runnable in any order
+
+### Error Handling
+
+- Use meaningful exception messages for invalid inputs (e.g., CsvParser validates 7+ CSV fields per line)
+- Throw custom exceptions when appropriate; avoid generic Exception
+- Validate inputs early in business logic (see TODO comments in `WorkoutCreator`)
+
+## Development Workflows
+
+**Build & Run:**
+```bash
+dotnet run --project ZwiftTTTSim.CLI -- --input sample-riders.csv
+```
+
+**Run Tests:**
+```bash
+dotnet test
+```
+
+**Generate workouts with custom settings:**
+```bash
+dotnet run --project ZwiftTTTSim.CLI -- -i my-riders.csv -o output/ -r 10
+```
+
+Output workouts appear in `workouts/` folder as `{RiderName}_TTT_Workout.zwo` files.
