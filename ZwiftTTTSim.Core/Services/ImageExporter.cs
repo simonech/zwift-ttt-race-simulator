@@ -13,7 +13,7 @@ public class ImageExporter
     private const double PowerRangePaddingMultiplier = 1.1;
     private const int PowerAxisSteps = 5;
     private const int TimeAxisSteps = 10;
-    private const int LegendTopMargin = 45;
+    private const int LegendTopMargin = 70;
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
@@ -108,7 +108,9 @@ public class ImageExporter
             Color = SKColors.Black,
             IsAntialias = true
         };
-        canvas.DrawText("Time (s)", ChartWidth / 2 - 30, ChartHeight - 10, xLabelFont, xLabelPaint);
+        var xLabelText = "Time (s)";
+        var xLabelWidth = xLabelFont.MeasureText(xLabelText);
+        canvas.DrawText(xLabelText, (ChartWidth - xLabelWidth) / 2, chartBottom + 35, xLabelFont, xLabelPaint);
 
         // Draw Y-axis ticks and labels (power)
         for (int i = 0; i <= PowerAxisSteps; i++)
@@ -225,16 +227,6 @@ public class ImageExporter
         var legendBoxSize = 15;
         var legendSpacing = 25;
         var legendItemsPerRow = 3;
-        var legendColumnWidth = 200;
-        var legendStartY = chartBottom + LegendTopMargin;
-
-        using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
-        using var legendTextPaint = new SKPaint
-        {
-            Color = SKColors.Black,
-            IsAntialias = true
-        };
-
         var legendItems = new[]
         {
             (Color: new SKColor(220, 50, 50), Text: "Anaerobic (>= 1.18)"),
@@ -244,13 +236,26 @@ public class ImageExporter
             (Color: new SKColor(0, 0, 255), Text: "Endurance (>= 0.60)"),
             (Color: new SKColor(105, 105, 105), Text: "Recovery (< 0.60)")
         };
+        
+        // Calculate legend width for centering
+        var legendColumnWidth = 200;
+        var legendTotalWidth = legendItemsPerRow * legendColumnWidth;
+        var legendStartX = (ChartWidth - legendTotalWidth) / 2;
+        var legendStartY = chartBottom + LegendTopMargin;
+
+        using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
+        using var legendTextPaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            IsAntialias = true
+        };
 
         for (int i = 0; i < legendItems.Length; i++)
         {
             var item = legendItems[i];
             var row = i / legendItemsPerRow;
             var col = i % legendItemsPerRow;
-            var legendX = chartLeft + (col * legendColumnWidth);
+            var legendX = legendStartX + (col * legendColumnWidth);
             var y = legendStartY + (row * legendSpacing);
             
             // Draw color box
