@@ -57,7 +57,7 @@ This creates a realistic, repeatable simulation of a TTT paceline.
 The simulator expects rider data in CSV format with the following structure:
 
 ```csv
-# RiderName, Weight, FTP, PullDuration, PowerByPosition[0], PowerByPosition[1], PowerByPosition[2], PowerByPosition[3]
+# RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
 Alice, 70, 300, 30, 350, 300, 280, 250
 Bob, 75, 280, 45, 330, 290, 270, 240
 Charlie, 72, 320, 60, 370, 320, 300, 270
@@ -67,8 +67,8 @@ Where:
 - **RiderName**: Unique identifier for the rider
 - **Weight**: Rider weight in kg (currently stored but not used in workout generation)
 - **FTP**: Functional Threshold Power in watts (currently stored but not used in workout generation)
-- **PullDuration**: How long the rider pulls at the front, in seconds
-- **PowerByPosition[0-3]**: Target power in watts for positions 1 (pulling), 2, 3, and 4+ (drafting)
+- **Pull Duration**: How long the rider pulls at the front, in seconds
+- **Power Values**: Target power in watts for positions 1 (pulling), 2, 3, and 4+ (drafting)
 
 A sample CSV file (`sample-riders.csv`) is included in the repository.
 
