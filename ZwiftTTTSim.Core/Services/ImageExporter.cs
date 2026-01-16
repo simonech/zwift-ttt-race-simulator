@@ -7,7 +7,7 @@ namespace ZwiftTTTSim.Core.Services;
 public class ImageExporter
 {
     private const int ChartWidth = 1200;
-    private const int ChartHeight = 650;
+    private const int ChartHeight = 680;
     private const int Padding = 60;
     private const int AxisPadding = 40;
     private const double PowerRangePaddingMultiplier = 1.1;
