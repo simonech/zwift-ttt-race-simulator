@@ -27,7 +27,7 @@ When contributing to the Zwift TTT race simulator project, please adhere to the 
    - Use exceptions for error handling and provide meaningful error messages.
    - Avoid using generic exceptions; create custom exception classes when necessary.
 5. **Testing**:
-   - Tests are writtien using xUnit framework.
+   - Tests are written using xUnit framework.
    - Write unit tests for all public methods and critical logic paths.
    - Use descriptive names for test methods that indicate the scenario being tested.
    - Ensure tests are independent and can be run in any order.
