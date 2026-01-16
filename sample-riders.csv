@@ -1,8 +1,8 @@
 # Sample rider data for Zwift TTT Race Simulator
 # Format: RiderName, Weight, FTP, PullDuration, PowerByPosition[0], PowerByPosition[1], PowerByPosition[2], PowerByPosition[3]
-Alice, 70, 300, 30, 350, 300, 280, 250
-Bob, 75, 280, 45, 330, 290, 270, 240
-Charlie, 72, 320, 60, 370, 320, 300, 270
-Diana, 68, 290, 90, 340, 310, 290, 260
-Simone, 98, 260, 45, 280, 260, 230, 200
-Eve, 65, 310, 40, 310, 280, 250, 220
+Willem, 74, 299, 90, 350, 235, 257, 249
+Roel, 81, 315, 90, 365, 305, 227, 254
+Bert, 75, 290, 60, 355, 291, 265, 206
+Yves, 78, 290, 45, 355, 292, 265, 249
+Peter, 78, 287, 45, 350, 299, 271, 254
+Jonas, 108, 284, 30, 320, 336, 316, 294
