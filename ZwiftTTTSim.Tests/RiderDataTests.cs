@@ -3,7 +3,7 @@ using ZwiftTTTSim.Core.Model;
 
 namespace ZwiftTTTSim.Tests;
 
-public class RiderPowePlanTests
+public class RiderDataTests
 {
     [Fact]
     public void RiderData_ShouldHaveCorrectWKg()
