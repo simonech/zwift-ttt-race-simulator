@@ -198,7 +198,7 @@ public class ImageExporter
                 Color = SKColors.Red,
                 IsAntialias = true
             };
-            var ftpText = $"FTP: {(int)ftp}W";
+            var ftpText = $"FTP: {Math.Round(ftp):F0}W";
             var ftpTextWidth = ftpLabelFont.MeasureText(ftpText);
             canvas.DrawText(ftpText, chartRight - ftpTextWidth - 10, ftpY - 5, ftpLabelFont, ftpLabelPaint);
         }
@@ -291,10 +291,13 @@ public class ImageExporter
             Directory.CreateDirectory(outputDirectory);
         }
 
+        // Create dictionary lookup for better performance
+        var ftpLookup = powerPlans?.ToDictionary(p => p.Name, p => p.Rider.FTP) ?? new Dictionary<string, double>();
+
         var riderIndex = 0;
         foreach (var (riderName, steps) in workouts)
         {
-            var ftp = powerPlans?.FirstOrDefault(p => p.Name == riderName)?.Rider.FTP ?? 0;
+            var ftp = ftpLookup.TryGetValue(riderName, out var ftpValue) ? ftpValue : 0;
             var imageData = ExportToImage(riderName, steps, riderIndex, totalRiders, ftp);
             var fileName = GetWorkoutImageFileName(riderName);
             var filePath = Path.Combine(outputDirectory, fileName);
