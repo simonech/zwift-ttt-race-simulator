@@ -7,6 +7,8 @@ public class WorkoutCreator
     public Dictionary<string, List<WorkoutStep>> CreateWorkouts(List<RiderPowerPlan> powerPlans, int rotations)
     {
 
+        //TODO: Validate input
+        
         var workouts = powerPlans.ToDictionary(
             plan => plan.Name,
             _ => new List<WorkoutStep>()

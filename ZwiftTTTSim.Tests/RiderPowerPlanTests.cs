@@ -20,7 +20,7 @@ public class RiderPowerPlanTests
             {
                 Name = "Alice",
                 PullDuration = TimeSpan.FromSeconds(30),
-                PowerByPosition = new[] { 350, 300, 280, 250 },
+                PowerByPosition = [350, 300, 280, 250],
                 Rider = new RiderData { FTP = 300, Weight = 70 }
             };
 

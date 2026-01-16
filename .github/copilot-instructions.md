@@ -1,4 +1,4 @@
-# Coding guidelens for Zwift TTT race simulator
+# Coding guidelines for Zwift TTT race simulator
 
 ---
 description: This file provides coding guidelines for agents contributing to the Zwift TTT race simulator project.

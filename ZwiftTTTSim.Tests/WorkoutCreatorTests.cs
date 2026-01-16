@@ -275,7 +275,7 @@ public class WorkoutCreatorTests
 
         // Assert
         var fifthSteps = workouts["Fifth"];
-        
+
         // Fifth rider's positions during rotation: 4,3,2,1,0
         // Position 4 should clamp to the last value (250W)
         Assert.Equal(250, fifthSteps[0].Power);
