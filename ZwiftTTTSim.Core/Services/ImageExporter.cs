@@ -7,14 +7,14 @@ namespace ZwiftTTTSim.Core.Services;
 public class ImageExporter
 {
     private const int ChartWidth = 1200;
-    private const int ChartHeight = 680;
+    private const int ChartHeight = 650;
     private const int Padding = 60;
     private const int AxisPadding = 40;
     private const double PowerRangePaddingMultiplier = 1.1;
     private const int PowerAxisSteps = 5;
     private const int TimeAxisSteps = 10;
     private const int XAxisLabelTopMargin = 35;
-    private const int LegendTopMargin = 70;
+    private const int LegendTopMargin = 45;
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
