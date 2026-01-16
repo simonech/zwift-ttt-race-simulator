@@ -27,8 +27,7 @@ public class WorkoutCreator
             {
                 var currentRider = rotationOrder[position];
 
-                // Clamp position index so positions beyond defined entries use the last value
-                var targetPower = currentRider.PowerByPosition[Math.Min(position, currentRider.PowerByPosition.Length - 1)];
+                var targetPower = currentRider.GetPowerByPosition(position);
 
                 var step = new WorkoutStep
                 {

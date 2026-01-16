@@ -12,4 +12,15 @@ public class RiderPowerPlan
     public int[] PowerByPosition { get; set; } = [];
 
     public RiderData Rider { get; set; } = new RiderData();
+
+    /// <summary>
+    /// Gets the power value for a specific position in the rotation.
+    /// Positions beyond the defined entries automatically use the last entry.
+    /// </summary>
+    /// <param name="position">The position index (0-based).</param>
+    /// <returns>The power value for the specified position.</returns>
+    public int GetPowerByPosition(int position)
+    {
+        return PowerByPosition[Math.Min(position, PowerByPosition.Length - 1)];
+    }
 }
