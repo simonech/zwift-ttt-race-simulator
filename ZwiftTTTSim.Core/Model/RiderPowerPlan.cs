@@ -21,6 +21,16 @@ public class RiderPowerPlan
     /// <returns>The power value for the specified position.</returns>
     public int GetPowerByPosition(int position)
     {
+        if (position < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(position), "Position must be non-negative.");
+        }
+
+        if (PowerByPosition == null || PowerByPosition.Length == 0)
+        {
+            // No power profile defined; default to 0 watts.
+            return 0;
+        }
         return PowerByPosition[Math.Min(position, PowerByPosition.Length - 1)];
     }
 }
