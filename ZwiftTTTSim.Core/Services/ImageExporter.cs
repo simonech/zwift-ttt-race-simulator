@@ -13,6 +13,7 @@ public class ImageExporter
     private const double PowerRangePaddingMultiplier = 1.1;
     private const int PowerAxisSteps = 5;
     private const int TimeAxisSteps = 10;
+    private const int XAxisLabelTopMargin = 35;
     private const int LegendTopMargin = 70;
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
@@ -110,7 +111,7 @@ public class ImageExporter
         };
         var xLabelText = "Time (s)";
         var xLabelWidth = xLabelFont.MeasureText(xLabelText);
-        canvas.DrawText(xLabelText, (ChartWidth - xLabelWidth) / 2, chartBottom + 35, xLabelFont, xLabelPaint);
+        canvas.DrawText(xLabelText, (ChartWidth - xLabelWidth) / 2, chartBottom + XAxisLabelTopMargin, xLabelFont, xLabelPaint);
 
         // Draw Y-axis ticks and labels (power)
         for (int i = 0; i <= PowerAxisSteps; i++)
