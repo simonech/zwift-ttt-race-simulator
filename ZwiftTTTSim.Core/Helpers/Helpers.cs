@@ -14,11 +14,12 @@ public static class Helpers
     /// <param name="pullingRiderIndex">Index of the rider currently pulling.</param>
     /// <param name="totalRiders">The total number of riders in the rotation.</param>
     /// <returns>The position of the rider in the rotation.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when totalRiders is zero or negative.</exception>
     public static int GetRotationPosition(int riderIndex, int pullingRiderIndex, int totalRiders)
     {
         if (totalRiders <= 0)
         {
-            throw new System.ArgumentOutOfRangeException(nameof(totalRiders), "totalRiders must be greater than 0.");
+            throw new ArgumentOutOfRangeException(nameof(totalRiders), "totalRiders must be greater than 0.");
         }
         return (riderIndex - pullingRiderIndex + totalRiders) % totalRiders;
     }

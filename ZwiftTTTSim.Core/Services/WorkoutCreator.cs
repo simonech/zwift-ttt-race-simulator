@@ -8,6 +8,13 @@ public class WorkoutCreator
     {
 
         //TODO: Validate input
+        // - powerPlans not empty
+        // - rotations > 0
+        // - each RiderPowerPlan has valid PowerByPosition data
+        // - each RiderPowerPlan has valid Rider data (FTP > 0)
+        // - each RiderPowerPlan has PullDuration > 0
+        // - names are unique
+        // Throw exceptions if any validation fails
         
         var workouts = powerPlans.ToDictionary(
             plan => plan.Name,
@@ -36,7 +43,7 @@ public class WorkoutCreator
                     DurationSeconds = pullDurationSeconds,
                     Power = targetPower
                 };
-                //TODO: remove SetIntensity from rotation logic and move to export logic
+                //TODO: remove SetIntensity from rotation logic and move to export logic (see comment in WorkoutStep.cs)
                 step.SetIntensity(currentRider.Rider.FTP);
                 workouts[currentRider.Name].Add(step);
             }

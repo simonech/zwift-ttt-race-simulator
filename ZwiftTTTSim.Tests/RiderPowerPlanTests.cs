@@ -30,4 +30,37 @@ public class RiderPowerPlanTests
         // Assert
         Assert.Equal(expectedPower, actualPower);
     }
+
+    [Fact]
+    public void GetPowerByPosition_ShouldThrowArgumentOutOfRangeException_WhenPositionIsNegative()
+    {
+        // Arrange
+        var riderPowerPlan = new RiderPowerPlan
+        {
+            Name = "Bob",
+            PullDuration = TimeSpan.FromSeconds(30),
+            PowerByPosition = [350, 300, 280, 250],
+            Rider = new RiderData { FTP = 300, Weight = 70 }
+        };
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => riderPowerPlan.GetPowerByPosition(-1));
+        Assert.Equal("position", exception.ParamName);
+    }
+
+    [Fact]
+    public void GetPowerByPosition_ShouldThrowInvalidOperationException_WhenPowerByPositionIsEmpty()
+    {
+        // Arrange
+        var riderPowerPlan = new RiderPowerPlan
+        {
+            Name = "Charlie",
+            PullDuration = TimeSpan.FromSeconds(30),
+            PowerByPosition = [],
+            Rider = new RiderData { FTP = 300, Weight = 70 }
+        };
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => riderPowerPlan.GetPowerByPosition(0));
+    }
 }

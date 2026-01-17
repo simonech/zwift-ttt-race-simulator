@@ -19,6 +19,8 @@ public class RiderPowerPlan
     /// </summary>
     /// <param name="position">The position index (0-based).</param>
     /// <returns>The power value for the specified position.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when position is negative.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when PowerByPosition is null or empty.</exception>
     public int GetPowerByPosition(int position)
     {
         if (position < 0)
@@ -28,8 +30,7 @@ public class RiderPowerPlan
 
         if (PowerByPosition == null || PowerByPosition.Length == 0)
         {
-            // No power profile defined; default to 0 watts.
-            return 0;
+            throw new InvalidOperationException("There is no data in the PowerByPostion array.");
         }
         return PowerByPosition[Math.Min(position, PowerByPosition.Length - 1)];
     }
