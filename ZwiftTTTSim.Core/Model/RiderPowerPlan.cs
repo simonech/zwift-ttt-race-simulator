@@ -30,7 +30,7 @@ public class RiderPowerPlan
 
         if (PowerByPosition == null || PowerByPosition.Length == 0)
         {
-            throw new InvalidOperationException("There is no data in the PowerByPostion array.");
+            throw new InvalidOperationException("There is no data in the PowerByPosition array.");
         }
         return PowerByPosition[Math.Min(position, PowerByPosition.Length - 1)];
     }
