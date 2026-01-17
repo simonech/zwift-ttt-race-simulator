@@ -54,3 +54,6 @@ TestResult.xml
 nunit-*.xml
 # Generated workout files
 workouts/
+
+# PR reviews and descriptions
+review/

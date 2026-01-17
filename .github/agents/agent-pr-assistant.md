@@ -97,17 +97,21 @@ Generate a comprehensive code review document with these sections:
 ## Output Format
 
 ### When generating PR Description:
+- Location: `review/` folder (ignored by git)
 - File name: `PR_DESCRIPTION_{branch-name}.md`
 - Format: Clean GitHub markdown
 - Length: Concise but comprehensive (500-800 words)
 - Tone: Professional, clear, action-oriented
 
 ### When generating Code Review:
+- Location: `review/` folder (ignored by git)
 - File name: `PR_REVIEW_{branch-name}.md`
 - Format: Detailed technical review
 - Length: Thorough but scannable (1000-1500 words)
 - Tone: Constructive, specific, actionable
 - Include: Tables, code snippets, clear recommendations
+
+**Note:** All generated files are stored in the `review/` folder, which is ignored by git to keep PR documentation local without cluttering the repository.
 
 ## Key Points
 
