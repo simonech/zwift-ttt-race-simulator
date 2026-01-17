@@ -24,4 +24,15 @@ public class HelperTests
         Assert.Equal(expected, actual);
     }
 
+    [Fact]
+    public void GetRotationPosition_ShouldThrowArgumentOutOfRangeException_WhenTotalRidersIsZeroOrNegative()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => Helpers.GetRotationPosition(0, 0, 0));
+        Assert.Equal("totalRiders", exception.ParamName);
+        
+        var exceptionNegative = Assert.Throws<ArgumentOutOfRangeException>(() => Helpers.GetRotationPosition(0, 0, -1));
+        Assert.Equal("totalRiders", exceptionNegative.ParamName);
+    }
+
 }

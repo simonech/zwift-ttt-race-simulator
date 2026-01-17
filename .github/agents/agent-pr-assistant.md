@@ -52,9 +52,6 @@ Generate a GitHub PR description with these sections:
 ### 📝 Related Issues
 [Link to issues or "N/A"]
 
-### 🚀 How to Test
-[Step-by-step instructions to verify the changes]
-
 ### 📚 Additional Notes
 [Anything else reviewers should know]
 ```
