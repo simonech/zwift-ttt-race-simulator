@@ -1,4 +1,4 @@
-![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](https://github.com/user-attachments/assets/f849a4fb-2561-43bc-bc7b-d8ef61f56f54)
+![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](docs/banner.png)
 
 # Zwift TTT race simulator
 

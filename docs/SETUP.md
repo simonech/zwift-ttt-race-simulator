@@ -11,9 +11,30 @@ This document outlines the manual steps required to complete the GitHub Pages de
 
 ✅ Created GitHub Actions workflow (`.github/workflows/pages.yml`) to automatically deploy to GitHub Pages
 
-✅ Updated `README.md` to include the banner image at the top
+✅ Updated `README.md` and `index.html` to reference local banner image
+
+✅ Created `download-banner.sh` script to download the banner image
 
 ## Manual Steps Required
+
+### 0. Download the Banner Image
+
+The banner image needs to be downloaded and committed to the repository. Run the provided script:
+
+```bash
+./download-banner.sh
+```
+
+Or download manually:
+```bash
+curl -L "https://github.com/user-attachments/assets/f849a4fb-2561-43bc-bc7b-d8ef61f56f54" -o docs/banner.png
+```
+
+Then commit the image:
+```bash
+git add docs/banner.png
+git commit -m "Add banner image"
+```
 
 ### 1. Enable GitHub Pages in Repository Settings
 
