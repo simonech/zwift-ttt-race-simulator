@@ -1,5 +1,5 @@
 # Sample rider data for Zwift TTT Race Simulator
-# Format: RiderName, Weight, FTP, PullDuration, PowerByPosition[0], PowerByPosition[1], PowerByPosition[2], PowerByPosition[3]
+# RiderName, Weight, FTP, Pull Duration, Pull Power, Wheel2Power, Wheel3Power, DraftPower
 Willem, 74, 299, 90, 350, 235, 257, 249
 Roel, 81, 315, 90, 365, 305, 227, 254
 Bert, 75, 290, 60, 355, 291, 265, 206

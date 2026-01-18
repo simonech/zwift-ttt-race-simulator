@@ -1,4 +1,4 @@
-![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](docs/banner.png)
+![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](docs/images/banner.png)
 
 # Zwift TTT race simulator
 
@@ -113,7 +113,7 @@ In practice, the input data can be:
 
 ### Example Workout Visualization
 
-![Example Workout Visualization](example_workout_visualization.png)
+![Example Workout Visualization](docs/images/example_workout_visualization.png)
 
 The visualization shows:
 - **X-axis**: Time (proportional to interval duration)
@@ -171,6 +171,23 @@ The current implementation focuses on **basic rotation simulation**. Planned enh
 - Competitive TTT teams (ZRL, WTRL, private leagues)
 - Riders who want to better understand their role in a team effort
 - Developers interested in cycling simulation tools
+
+---
+
+## 🔧 Technical Notes
+
+### System.CommandLine Version
+
+⚠️ **Important:** This project uses `System.CommandLine` version `2.0.0-beta4.22272.1`
+
+While this is a beta version, it is intentionally pinned for stability reasons:
+- Beta5 and later versions introduced breaking API changes
+- Later "stable" releases (2.0.2+) continue to have API instability  
+- Beta4 has proven to be more stable and well-tested than subsequent releases
+
+See [dotnet/command-line-api#2576](https://github.com/dotnet/command-line-api/issues/2576) for context on the discontinuity between beta4 and beta5.
+
+**Do not upgrade** without thorough testing. When `System.CommandLine` releases a true stable 3.0 version, consider upgrading after validation.
 
 ---
 

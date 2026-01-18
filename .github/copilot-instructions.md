@@ -67,3 +67,14 @@ dotnet run --project ZwiftTTTSim.CLI -- -i my-riders.csv -o output/ -r 10
 ```
 
 Output workouts appear in `workouts/` folder as `{RiderName}_TTT_Workout.zwo` files.
+
+## Important: System.CommandLine Version
+
+⚠️ **This project is pinned to `System.CommandLine` version `2.0.0-beta4.22272.1`** for a specific reason:
+
+- **Do NOT upgrade** to versions 2.0.2, 2.1.x, or later
+- Beta5 introduced breaking API changes that broke the CLI
+- Later "stable" releases continue to have API instability
+- See [dotnet/command-line-api#2576](https://github.com/dotnet/command-line-api/issues/2576) for details
+
+Beta4 remains the most stable version despite being labeled as "beta". It has a well-tested, consistent API. When `System.CommandLine` 3.0 or a true stable release becomes available, consider upgrading after thorough testing.
