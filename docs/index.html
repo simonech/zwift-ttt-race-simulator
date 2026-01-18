@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zwift TTT Race Simulator - Precision Training for WTRL Time Trials</title>
+    <meta name="description" content="A workout generator for Team Time Trial racing on Zwift designed to help coaches and teams rehearse race strategy and experience realistic race dynamics in ERG mode.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="banner">
+        <img src="banner.png" alt="Zwift TTT Race Simulator - Precision training for WTRL Time Trials" class="banner-image">
+    </header>
+
+    <main class="container">
+        <section class="intro">
+            <p class="lead">A workout generator for <strong>Team Time Trial (TTT)</strong> racing on Zwift (both ZRL and WTRL), designed to help coaches and teams <strong>rehearse race strategy</strong> and <strong>experience realistic race dynamics</strong> in ERG mode.</p>
+            <p>While races are held on Zwift, the generated workouts can be used on <strong>any cycling platform</strong> that supports ERG-controlled trainers.</p>
+        </section>
+
+        <div class="notice">
+            <p>⚠️ <strong>This is still a work in progress</strong></p>
+        </div>
+
+        <section id="motivation">
+            <h2>🚴 Motivation</h2>
+            <p>Team Time Trial racing is not just about FTP — it's about:</p>
+            <ul>
+                <li>Pull duration and rotation order</li>
+                <li>Drafting dynamics</li>
+                <li>Smooth transitions</li>
+                <li>Managing fatigue over time</li>
+                <li>Surviving climbs as a team</li>
+            </ul>
+            <p>Most existing tools focus on <strong>optimizing a race plan</strong>, but there is a gap between <em>having a plan</em> and <em>knowing if your riders can execute it</em>.</p>
+            <p>This project aims to close that gap by allowing teams to <strong>simulate their race as a structured workout</strong>, so riders can:</p>
+            <ul>
+                <li>Feel the real effort of the planned rotations</li>
+                <li>Identify weak points before race day</li>
+                <li>Fine-tune pacing and pull durations</li>
+                <li>Train specifically for upcoming events</li>
+            </ul>
+        </section>
+
+        <section id="goals">
+            <h2>🎯 Goals</h2>
+            <ul>
+                <li>Simulate a Zwift TTT race using a deterministic rotation model</li>
+                <li>Generate <strong>one workout per rider</strong>, reflecting their exact role in the rotation</li>
+                <li>Allow riders to train the race effort in ERG mode</li>
+                <li>Provide a foundation for future race simulation and coaching insights</li>
+            </ul>
+        </section>
+
+        <section id="concepts">
+            <h2>🧠 Core Concepts</h2>
+            <h3>Rotation-based simulation</h3>
+            <ul>
+                <li>Riders rotate through lead, draft, and last-wheel positions</li>
+                <li>Each rider has:
+                    <ul>
+                        <li>A pull duration</li>
+                        <li>A power target per position (1st, 2nd, 3rd, 4th+)</li>
+                    </ul>
+                </li>
+                <li>When a rider finishes their pull:
+                    <ul>
+                        <li>They rotate to the back</li>
+                        <li>Other riders move up one position</li>
+                    </ul>
+                </li>
+                <li>The pull leader defines the duration of the block for all riders</li>
+            </ul>
+            <p>This creates a realistic, repeatable simulation of a TTT paceline.</p>
+        </section>
+
+        <section id="inputs">
+            <h2>📥 Inputs</h2>
+            <p>The simulator expects rider data in CSV format with the following structure:</p>
+            <pre><code># RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
+Alice, 70, 300, 30, 350, 300, 280, 250
+Bob, 75, 280, 45, 330, 290, 270, 240
+Charlie, 72, 320, 60, 370, 320, 300, 270</code></pre>
+            <p>Where:</p>
+            <ul>
+                <li><strong>RiderName</strong>: Unique identifier for the rider</li>
+                <li><strong>Weight</strong>: Rider weight in kg (currently stored but not used in workout generation)</li>
+                <li><strong>FTP</strong>: Functional Threshold Power in watts (currently stored but not used in workout generation)</li>
+                <li><strong>Pull Duration</strong>: How long the rider pulls at the front, in seconds</li>
+                <li><strong>Power Values</strong>: Target power in watts for positions 1 (pulling), 2, 3, and 4+ (drafting)</li>
+            </ul>
+            <p>A sample CSV file (<code>sample-riders.csv</code>) is included in the repository.</p>
+
+            <h3>CLI Usage</h3>
+            <pre><code>dotnet run --project ZwiftTTTSim.CLI -- --input &lt;csv-file&gt; [--output &lt;folder&gt;] [--rotations &lt;count&gt;]</code></pre>
+            <p><strong>Options:</strong></p>
+            <ul>
+                <li><code>-i, --input &lt;file&gt;</code> (Required): Path to the CSV file containing rider data</li>
+                <li><code>-o, --output &lt;folder&gt;</code>: Output folder for workout files (default: <code>workouts</code>)</li>
+                <li><code>-r, --rotations &lt;count&gt;</code>: Number of rotations for the workout (default: <code>5</code>)</li>
+            </ul>
+            <p><strong>Example:</strong></p>
+            <pre><code># Generate workouts with default settings (5 rotations, output to 'workouts' folder)
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv
+
+# Generate workouts with custom settings
+dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10</code></pre>
+            <p>In practice, the input data can be:</p>
+            <ul>
+                <li>Hand-crafted based on team strategy</li>
+                <li>Generated by third-party Zwift TTT optimization tools</li>
+                <li>Tuned by a coach based on rider feedback</li>
+            </ul>
+        </section>
+
+        <section id="outputs">
+            <h2>📤 Outputs</h2>
+            <ul>
+                <li>One structured workout per rider</li>
+                <li>Exported as XML-based workout files (e.g. Zwift <code>.zwo</code> / WKO-compatible formats)</li>
+                <li>Visual representation (PNG images) showing power profile over time with color-coded position indicators</li>
+                <li>Workouts can be executed on:
+                    <ul>
+                        <li>Zwift</li>
+                        <li>TrainerRoad</li>
+                        <li>Wahoo SYSTM</li>
+                        <li>Any platform supporting ERG mode workouts</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Example Workout Visualization</h3>
+            <img src="../example_workout_visualization.png" alt="Example Workout Visualization" class="visualization">
+            <p>The visualization shows:</p>
+            <ul>
+                <li><strong>X-axis</strong>: Time (proportional to interval duration)</li>
+                <li><strong>Y-axis</strong>: Power output in watts</li>
+                <li><strong>FTP Line</strong>: Red dashed horizontal line showing the rider's Functional Threshold Power</li>
+                <li><strong>Color coding</strong> (based on intensity relative to FTP):
+                    <ul>
+                        <li>🔴 Red: Anaerobic (≥ 1.18 × FTP)</li>
+                        <li>🟠 Orange: VO2 Max (≥ 1.05 × FTP)</li>
+                        <li>🟡 Yellow: Threshold (≥ 0.90 × FTP)</li>
+                        <li>🟢 Green: Tempo (≥ 0.75 × FTP)</li>
+                        <li>🔵 Blue: Endurance (≥ 0.60 × FTP)</li>
+                        <li>⚫ Gray: Recovery (&lt; 0.60 × FTP)</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <section id="development">
+            <h2>🧪 Development Approach</h2>
+            <p>This project is developed using <strong>Test-Driven Development (TDD)</strong>:</p>
+            <ul>
+                <li>Rotation logic is covered by unit tests</li>
+                <li>Example-based tests validate known TTT scenarios</li>
+                <li>Future extensions are added without breaking existing behavior</li>
+            </ul>
+            <p>This ensures the simulator remains predictable and safe to extend.</p>
+        </section>
+
+        <section id="roadmap">
+            <h2>🛣️ Roadmap (Planned Features)</h2>
+            <p>The current implementation focuses on <strong>basic rotation simulation</strong>. Planned enhancements include:</p>
+            <ul>
+                <li>🕒 <strong>Race duration–based pull estimation</strong><br>
+                    Automatically compute the number of pulls required to reach a target race time.</li>
+                <li>🚦 <strong>Race start simulation</strong><br>
+                    Initial effort block simulating the start from the gate before drafting is effective.</li>
+                <li>🔄 <strong>Transition dynamics</strong><br>
+                    Model ease-off and re-acceleration when dropping from lead to last position.</li>
+                <li>⛰️ <strong>Climb-aware pacing</strong><br>
+                    Support w/kg-based pacing sections to better simulate climbs where absolute power pacing breaks down.</li>
+                <li>📊 <strong>Effort and fatigue analysis</strong><br>
+                    Estimate which riders are likely to struggle and where.</li>
+                <li>🧠 <strong>Coaching insights</strong><br>
+                    Identify limiting riders and suggest rotation or pacing adjustments.</li>
+            </ul>
+        </section>
+
+        <section id="audience">
+            <h2>👥 Target Audience</h2>
+            <ul>
+                <li>Zwift TTT coaches</li>
+                <li>Competitive TTT teams (ZRL, WTRL, private leagues)</li>
+                <li>Riders who want to better understand their role in a team effort</li>
+                <li>Developers interested in cycling simulation tools</li>
+            </ul>
+        </section>
+
+        <section id="disclaimer">
+            <h2>⚠️ Disclaimer</h2>
+            <p>This tool is <strong>not affiliated with Zwift</strong>.<br>
+            Zwift is a registered trademark of Zwift, Inc.</p>
+            <p>The simulator aims to approximate race dynamics for training and planning purposes and does not guarantee identical in-game results.</p>
+        </section>
+
+        <section id="license">
+            <h2>📄 License</h2>
+            <p>This project is licensed under the MIT License – see the <a href="https://github.com/simonech/zwift-ttt-race-simulator/blob/main/LICENSE">LICENSE</a> file for details.</p>
+        </section>
+
+        <section class="github-link">
+            <a href="https://github.com/simonech/zwift-ttt-race-simulator" class="btn">View on GitHub</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Zwift TTT Race Simulator. Licensed under the MIT License.</p>
+    </footer>
+</body>
+</html>
