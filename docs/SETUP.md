@@ -8,33 +8,13 @@ This document outlines the manual steps required to complete the GitHub Pages de
 - `index.html` - Main website page with content from README.md
 - `styles.css` - Styling based on the banner image color scheme (dark blue background with orange/red accents)
 - `.nojekyll` - File to ensure GitHub Pages serves CSS files correctly
+- `banner.png` - Placeholder banner image (to be replaced with actual banner)
 
 ✅ Created GitHub Actions workflow (`.github/workflows/pages.yml`) to automatically deploy to GitHub Pages
 
 ✅ Updated `README.md` and `index.html` to reference local banner image
 
-✅ Created `download-banner.sh` script to download the banner image
-
 ## Manual Steps Required
-
-### 0. Download the Banner Image
-
-The banner image needs to be downloaded and committed to the repository. Run the provided script:
-
-```bash
-./download-banner.sh
-```
-
-Or download manually:
-```bash
-curl -L "https://github.com/user-attachments/assets/f849a4fb-2561-43bc-bc7b-d8ef61f56f54" -o docs/banner.png
-```
-
-Then commit the image:
-```bash
-git add docs/banner.png
-git commit -m "Add banner image"
-```
 
 ### 1. Enable GitHub Pages in Repository Settings
 
@@ -69,7 +49,7 @@ The website design is based on the banner image colors:
 
 ## Website Features
 
-- ✅ Banner image at the top (referenced from GitHub assets)
+- ✅ Banner image at the top (placeholder included, can be replaced)
 - ✅ Full README content converted to styled HTML
 - ✅ Color-coded sections with emoji icons
 - ✅ Responsive design for mobile/tablet/desktop
@@ -86,9 +66,12 @@ If the site doesn't load after deployment:
 3. **Check permissions**: The workflow requires `pages: write` and `id-token: write` permissions (already configured)
 4. **Wait a few minutes**: GitHub Pages can take 1-2 minutes to propagate changes
 
-If the banner image doesn't load:
-- The image is hosted on GitHub's CDN and should load automatically
-- If it fails, you may need to download and commit the image to the `docs/` folder
+## Banner Image
+
+A placeholder banner image is included at `docs/banner.png`. To replace it with the actual banner:
+1. Replace `docs/banner.png` with your desired banner image
+2. Recommended dimensions: 1200x400 pixels
+3. The design uses colors from the banner (navy blue, orange, red gradients)
 
 ## Future Enhancements
 
