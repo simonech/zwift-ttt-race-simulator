@@ -113,14 +113,20 @@ In practice, the input data can be:
   - Wahoo SYSTM
   - Any platform supporting ERG mode workouts
 
-### Example Workout Visualization
+### Example Workout Visualizations
 
-![Example Workout Visualization](docs/images/example_workout_visualization.png)
+**Alice's Workout** - Showcases Anaerobic, VO2 Max, Threshold, and Recovery zones:
 
-The visualization shows:
+![Alice Workout Visualization](docs/images/sample_alice.png)
+
+**Bob's Workout** - Showcases Threshold, VO2 Max, Tempo, and Recovery zones:
+
+![Bob Workout Visualization](docs/images/sample_bob.png)
+
+The visualizations show:
 - **X-axis**: Time (proportional to interval duration)
 - **Y-axis**: Power output in watts
-- **FTP Line**: Red dashed horizontal line showing the rider's Functional Threshold Power
+- **FTP Line**: White dotted horizontal line showing the rider's Functional Threshold Power
 - **Color coding** (based on intensity relative to FTP): 
   - 🔴 Red: Anaerobic (≥ 1.18 × FTP)
   - 🟠 Orange: VO2 Max (≥ 1.05 × FTP)

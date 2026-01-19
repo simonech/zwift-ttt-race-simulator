@@ -15,8 +15,28 @@ public class ImageExporter
     private const int TimeAxisSteps = 10;
     private const int XAxisLabelTopMargin = 35;
     private const int LegendTopMargin = 45;
+    private const int BarSpacing = 2; // Spacing between bars in pixels
+    private const float FtpDashLength = 4; // Length of dash segments in FTP line
+    private const float FtpGapLength = 4; // Length of gap segments in FTP line
+    private const double GradientDarkerMultiplier = 0.7; // Multiplier for darker gradient at bottom
+    private const double GradientLighterMultiplier = 1.2; // Multiplier for lighter gradient at top
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
+
+    /// <summary>
+    /// Scales a color by a multiplier, clamping values to valid byte range (0-255).
+    /// </summary>
+    /// <param name="color">The base color to scale</param>
+    /// <param name="multiplier">The multiplier to apply to each RGB component</param>
+    /// <returns>A new color with scaled RGB components</returns>
+    private static SKColor ScaleColor(SKColor color, double multiplier)
+    {
+        return new SKColor(
+            (byte)Math.Clamp((int)(color.Red * multiplier), 0, 255),
+            (byte)Math.Clamp((int)(color.Green * multiplier), 0, 255),
+            (byte)Math.Clamp((int)(color.Blue * multiplier), 0, 255)
+        );
+    }
 
     public static string GetWorkoutImageFileName(string riderName)
     {
@@ -40,8 +60,8 @@ public class ImageExporter
         using var surface = SKSurface.Create(new SKImageInfo(ChartWidth, ChartHeight));
         var canvas = surface.Canvas;
         
-        // Clear background to white
-        canvas.Clear(SKColors.White);
+        // Clear background to dark navy blue (matching banner design)
+        canvas.Clear(new SKColor(26, 35, 50)); // #1a2332
 
         // Calculate chart area
         var chartLeft = Padding + AxisPadding;
@@ -62,7 +82,7 @@ public class ImageExporter
         using var titleFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 24);
         using var titlePaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = SKColors.White, // White text for dark background
             IsAntialias = true
         };
         var titleText = $"TTT Workout - {riderName}";
@@ -72,7 +92,7 @@ public class ImageExporter
         // Draw axes
         using var axisPaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = new SKColor(150, 150, 150), // Light gray for dark background
             StrokeWidth = 2,
             IsAntialias = true
         };
@@ -86,7 +106,7 @@ public class ImageExporter
         using var labelFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var labelPaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = new SKColor(200, 200, 200), // Light gray for labels
             IsAntialias = true
         };
 
@@ -94,7 +114,7 @@ public class ImageExporter
         using var yLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 14);
         using var yLabelPaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = SKColors.White, // White for axis label
             IsAntialias = true
         };
         canvas.Save();
@@ -106,7 +126,7 @@ public class ImageExporter
         using var xLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 14);
         using var xLabelPaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = SKColors.White, // White for axis label
             IsAntialias = true
         };
         var xLabelText = "Time (s)";
@@ -136,47 +156,61 @@ public class ImageExporter
         {
             var step = steps[i];
             
-            // Calculate bar dimensions
+            // Calculate bar dimensions with spacing
             var barWidth = (float)((chartAreaWidth * step.DurationSeconds) / totalDuration);
+            var actualBarWidth = Math.Max(1, barWidth - BarSpacing); // Ensure minimum width of 1 pixel
             var barHeight = (float)((chartAreaHeight * step.Power) / powerRange);
             
-            // Determine bar color based on intensity zone
+            // Determine bar color based on intensity zone - matching banner design
             var barColor = step.Intensity switch
             {
-                >= 1.18 => new SKColor(220, 50, 50),      // Red for Anaerobic
-                >= 1.05 => new SKColor(255, 165, 0),      // Orange for VO2 Max
-                >= 0.90 => new SKColor(255, 200, 0),      // Yellow for Threshold
-                >= 0.75 => new SKColor(50, 180, 50),      // Green for Tempo
-                >= 0.60 => new SKColor(0, 0, 255),        // Blue for Endurance
-                _ => new SKColor(105, 105, 105)           // DarkGray for Recovery
+                >= 1.18 => new SKColor(231, 76, 60),      // Red #e74c3c for Anaerobic
+                >= 1.05 => new SKColor(244, 125, 66),     // Orange #f47d42 for VO2 Max
+                >= 0.90 => new SKColor(244, 197, 66),     // Yellow #f4c542 for Threshold
+                >= 0.75 => new SKColor(90, 181, 94),      // Green #5ab55e for Tempo
+                >= 0.60 => new SKColor(74, 155, 155),     // Teal #4a9b9b for Endurance
+                _ => new SKColor(59, 90, 125)             // Blue #3b5a7d for Recovery
             };
 
-            // Draw bar
-            using var barPaint = new SKPaint
-            {
-                Color = barColor,
-                IsAntialias = true
-            };
-            
+            // Draw bar with gradient (darker at bottom, lighter at top)
             var barRect = new SKRect(
                 currentX,
                 chartBottom - barHeight,
-                currentX + barWidth,
+                currentX + actualBarWidth,
                 chartBottom
             );
+            
+            // Create gradient from darker (bottom) to lighter (top)
+            var darkerColor = ScaleColor(barColor, GradientDarkerMultiplier);
+            var lighterColor = ScaleColor(barColor, GradientLighterMultiplier);
+            
+            using var gradient = SKShader.CreateLinearGradient(
+                new SKPoint(currentX, chartBottom),           // Start at bottom
+                new SKPoint(currentX, chartBottom - barHeight), // End at top
+                new[] { darkerColor, lighterColor },
+                new[] { 0f, 1f },
+                SKShaderTileMode.Clamp
+            );
+            
+            using var barPaint = new SKPaint
+            {
+                Shader = gradient,
+                IsAntialias = true
+            };
+            
             canvas.DrawRect(barRect, barPaint);
 
-            // Draw bar outline
+            // Draw bar outline (subtle dark outline for definition)
             using var outlinePaint = new SKPaint
             {
-                Color = SKColors.Black,
+                Color = new SKColor(20, 20, 20, 100), // Dark semi-transparent outline
                 StrokeWidth = 1,
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke
             };
             canvas.DrawRect(barRect, outlinePaint);
 
-            currentX += barWidth;
+            currentX += barWidth; // Move full width including spacing
         }
 
         // Draw FTP horizontal line if FTP is provided and within visible range
@@ -184,21 +218,21 @@ public class ImageExporter
         {
             var ftpY = (float)(chartBottom - (chartAreaHeight * ftp / powerRange));
             
-            // Draw dashed line at FTP
+            // Draw white dotted line at FTP (matching banner design)
             using var ftpLinePaint = new SKPaint
             {
-                Color = SKColors.Red,
+                Color = SKColors.White, // White dotted line
                 StrokeWidth = 2,
                 IsAntialias = true,
-                PathEffect = SKPathEffect.CreateDash(new float[] { 10, 5 }, 0)
+                PathEffect = SKPathEffect.CreateDash(new float[] { FtpDashLength, FtpGapLength }, 0)
             };
             canvas.DrawLine(chartLeft, ftpY, chartRight, ftpY, ftpLinePaint);
             
-            // Draw FTP label
+            // Draw FTP label in white
             using var ftpLabelFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 12);
             using var ftpLabelPaint = new SKPaint
             {
-                Color = SKColors.Red,
+                Color = SKColors.White, // White text
                 IsAntialias = true
             };
             var ftpText = $"FTP: {Math.Round(ftp):F0}W";
@@ -230,12 +264,12 @@ public class ImageExporter
         var legendItemsPerRow = 3;
         var legendItems = new[]
         {
-            (Color: new SKColor(220, 50, 50), Text: "Anaerobic (>= 1.18)"),
-            (Color: new SKColor(255, 165, 0), Text: "VO2 Max (>= 1.05)"),
-            (Color: new SKColor(255, 200, 0), Text: "Threshold (>= 0.90)"),
-            (Color: new SKColor(50, 180, 50), Text: "Tempo (>= 0.75)"),
-            (Color: new SKColor(0, 0, 255), Text: "Endurance (>= 0.60)"),
-            (Color: new SKColor(105, 105, 105), Text: "Recovery (< 0.60)")
+            (Color: new SKColor(231, 76, 60), Text: "Anaerobic (>= 1.18)"),      // #e74c3c
+            (Color: new SKColor(244, 125, 66), Text: "VO2 Max (>= 1.05)"),      // #f47d42
+            (Color: new SKColor(244, 197, 66), Text: "Threshold (>= 0.90)"),    // #f4c542
+            (Color: new SKColor(90, 181, 94), Text: "Tempo (>= 0.75)"),         // #5ab55e
+            (Color: new SKColor(74, 155, 155), Text: "Endurance (>= 0.60)"),    // #4a9b9b
+            (Color: new SKColor(59, 90, 125), Text: "Recovery (< 0.60)")        // #3b5a7d
         };
         
         // Calculate legend width for centering
@@ -247,7 +281,7 @@ public class ImageExporter
         using var legendTextFont = new SKFont(SKTypeface.FromFamilyName("Arial"), 12);
         using var legendTextPaint = new SKPaint
         {
-            Color = SKColors.Black,
+            Color = new SKColor(200, 200, 200), // Light gray text for dark background
             IsAntialias = true
         };
 
@@ -270,7 +304,7 @@ public class ImageExporter
             // Draw box outline
             using var legendOutlinePaint = new SKPaint
             {
-                Color = SKColors.Black,
+                Color = new SKColor(100, 100, 100), // Lighter outline for dark background
                 StrokeWidth = 1,
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke
