@@ -155,19 +155,40 @@ public class ImageExporter
                 _ => new SKColor(59, 90, 125)             // Blue #3b5a7d for Recovery
             };
 
-            // Draw bar
-            using var barPaint = new SKPaint
-            {
-                Color = barColor,
-                IsAntialias = true
-            };
-            
+            // Draw bar with gradient (darker at bottom, lighter at top)
             var barRect = new SKRect(
                 currentX,
                 chartBottom - barHeight,
                 currentX + actualBarWidth,
                 chartBottom
             );
+            
+            // Create gradient from darker (bottom) to lighter (top)
+            var darkerColor = new SKColor(
+                (byte)(barColor.Red * 0.7),
+                (byte)(barColor.Green * 0.7),
+                (byte)(barColor.Blue * 0.7)
+            );
+            var lighterColor = new SKColor(
+                (byte)Math.Min(255, barColor.Red * 1.2),
+                (byte)Math.Min(255, barColor.Green * 1.2),
+                (byte)Math.Min(255, barColor.Blue * 1.2)
+            );
+            
+            using var gradient = SKShader.CreateLinearGradient(
+                new SKPoint(currentX, chartBottom),           // Start at bottom
+                new SKPoint(currentX, chartBottom - barHeight), // End at top
+                new[] { darkerColor, lighterColor },
+                new[] { 0f, 1f },
+                SKShaderTileMode.Clamp
+            );
+            
+            using var barPaint = new SKPaint
+            {
+                Shader = gradient,
+                IsAntialias = true
+            };
+            
             canvas.DrawRect(barRect, barPaint);
 
             // Draw bar outline (subtle dark outline for definition)
