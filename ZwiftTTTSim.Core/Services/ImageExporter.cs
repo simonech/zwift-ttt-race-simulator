@@ -16,6 +16,8 @@ public class ImageExporter
     private const int XAxisLabelTopMargin = 35;
     private const int LegendTopMargin = 45;
     private const int BarSpacing = 2; // Spacing between bars in pixels
+    private const float FtpDashLength = 4; // Length of dash segments in FTP line
+    private const float FtpGapLength = 4; // Length of gap segments in FTP line
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
@@ -139,7 +141,7 @@ public class ImageExporter
             
             // Calculate bar dimensions with spacing
             var barWidth = (float)((chartAreaWidth * step.DurationSeconds) / totalDuration);
-            var actualBarWidth = barWidth - BarSpacing; // Leave space between bars
+            var actualBarWidth = Math.Max(1, barWidth - BarSpacing); // Ensure minimum width of 1 pixel
             var barHeight = (float)((chartAreaHeight * step.Power) / powerRange);
             
             // Determine bar color based on intensity zone - matching banner design
@@ -192,7 +194,7 @@ public class ImageExporter
                 Color = SKColors.White, // White dotted line
                 StrokeWidth = 2,
                 IsAntialias = true,
-                PathEffect = SKPathEffect.CreateDash(new float[] { 4, 4 }, 0) // Shorter dots for dotted effect
+                PathEffect = SKPathEffect.CreateDash(new float[] { FtpDashLength, FtpGapLength }, 0)
             };
             canvas.DrawLine(chartLeft, ftpY, chartRight, ftpY, ftpLinePaint);
             
