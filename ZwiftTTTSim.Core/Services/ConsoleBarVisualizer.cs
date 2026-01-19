@@ -10,6 +10,13 @@ public class ConsoleBarVisualizer
 {
     private const int MaxBarWidth = 80;
     private const int MaxRotationsToShow = 2;
+    
+    // Intensity zone thresholds (matching ImageExporter zones)
+    private const double AnaerobicThreshold = 1.18;
+    private const double Vo2MaxThreshold = 1.05;
+    private const double ThresholdZone = 0.90;
+    private const double TempoThreshold = 0.75;
+    private const double EnduranceThreshold = 0.60;
 
     /// <summary>
     /// Creates an ASCII bar visualization for a rider's workout, limited to the first 2 rotations.
@@ -89,12 +96,12 @@ public class ConsoleBarVisualizer
     {
         return intensity switch
         {
-            >= 1.18 => '█', // Anaerobic - solid block
-            >= 1.05 => '█', // VO2 Max - solid block
-            >= 0.90 => '▓', // Threshold - dark shade
-            >= 0.75 => '▒', // Tempo - medium shade
-            >= 0.60 => '░', // Endurance - light shade
-            _ => '·'        // Recovery - light dot
+            >= AnaerobicThreshold => '█', // Anaerobic - solid block
+            >= Vo2MaxThreshold => '█',    // VO2 Max - solid block
+            >= ThresholdZone => '▓',      // Threshold - dark shade
+            >= TempoThreshold => '▒',     // Tempo - medium shade
+            >= EnduranceThreshold => '░', // Endurance - light shade
+            _ => '·'                      // Recovery - light dot
         };
     }
 
@@ -105,12 +112,12 @@ public class ConsoleBarVisualizer
     {
         return intensity switch
         {
-            >= 1.18 => ConsoleColor.Red,        // Anaerobic (Red)
-            >= 1.05 => ConsoleColor.DarkYellow, // VO2 Max (Orange -> DarkYellow)
-            >= 0.90 => ConsoleColor.Yellow,     // Threshold (Yellow)
-            >= 0.75 => ConsoleColor.Green,      // Tempo (Green)
-            >= 0.60 => ConsoleColor.Blue,       // Endurance (Blue)
-            _ => ConsoleColor.DarkGray          // Recovery (DarkGray)
+            >= AnaerobicThreshold => ConsoleColor.Red,        // Anaerobic (Red)
+            >= Vo2MaxThreshold => ConsoleColor.DarkYellow,    // VO2 Max (Orange -> DarkYellow)
+            >= ThresholdZone => ConsoleColor.Yellow,          // Threshold (Yellow)
+            >= TempoThreshold => ConsoleColor.Green,          // Tempo (Green)
+            >= EnduranceThreshold => ConsoleColor.Blue,       // Endurance (Blue)
+            _ => ConsoleColor.DarkGray                        // Recovery (DarkGray)
         };
     }
 
