@@ -269,7 +269,7 @@ public class ImageExporter
             (Color: new SKColor(244, 197, 66), Text: "Threshold (>= 0.90)"),    // #f4c542
             (Color: new SKColor(90, 181, 94), Text: "Tempo (>= 0.75)"),         // #5ab55e
             (Color: new SKColor(74, 155, 155), Text: "Endurance (>= 0.60)"),    // #4a9b9b
-            (Color: new SKColor(59, 90, 125), Text: "Recovery (< 0.60)")        // #3b5a7d
+            (Color: new SKColor(128, 128, 128), Text: "Recovery (< 0.60)")      // #808080
         };
         
         // Calculate legend width for centering
