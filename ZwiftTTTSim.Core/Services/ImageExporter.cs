@@ -18,8 +18,25 @@ public class ImageExporter
     private const int BarSpacing = 2; // Spacing between bars in pixels
     private const float FtpDashLength = 4; // Length of dash segments in FTP line
     private const float FtpGapLength = 4; // Length of gap segments in FTP line
+    private const double GradientDarkerMultiplier = 0.7; // Multiplier for darker gradient at bottom
+    private const double GradientLighterMultiplier = 1.2; // Multiplier for lighter gradient at top
 
     private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
+
+    /// <summary>
+    /// Scales a color by a multiplier, clamping values to valid byte range (0-255).
+    /// </summary>
+    /// <param name="color">The base color to scale</param>
+    /// <param name="multiplier">The multiplier to apply to each RGB component</param>
+    /// <returns>A new color with scaled RGB components</returns>
+    private static SKColor ScaleColor(SKColor color, double multiplier)
+    {
+        return new SKColor(
+            (byte)Math.Clamp((int)(color.Red * multiplier), 0, 255),
+            (byte)Math.Clamp((int)(color.Green * multiplier), 0, 255),
+            (byte)Math.Clamp((int)(color.Blue * multiplier), 0, 255)
+        );
+    }
 
     public static string GetWorkoutImageFileName(string riderName)
     {
@@ -164,16 +181,8 @@ public class ImageExporter
             );
             
             // Create gradient from darker (bottom) to lighter (top)
-            var darkerColor = new SKColor(
-                (byte)(barColor.Red * 0.7),
-                (byte)(barColor.Green * 0.7),
-                (byte)(barColor.Blue * 0.7)
-            );
-            var lighterColor = new SKColor(
-                (byte)Math.Min(255, barColor.Red * 1.2),
-                (byte)Math.Min(255, barColor.Green * 1.2),
-                (byte)Math.Min(255, barColor.Blue * 1.2)
-            );
+            var darkerColor = ScaleColor(barColor, GradientDarkerMultiplier);
+            var lighterColor = ScaleColor(barColor, GradientLighterMultiplier);
             
             using var gradient = SKShader.CreateLinearGradient(
                 new SKPoint(currentX, chartBottom),           // Start at bottom
