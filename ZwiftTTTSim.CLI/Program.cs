@@ -65,6 +65,7 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
 
         int riderIndex = 0;
         var riderColors = new[] { ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Magenta, ConsoleColor.Blue, ConsoleColor.Red, ConsoleColor.Cyan };
+        var barVisualizer = new ConsoleBarVisualizer();
 
         foreach (var (riderName, steps) in workouts)
         {
@@ -107,9 +108,16 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
                 Console.WriteLine($" {steps[i].Power,-12}");
                 Console.ResetColor();
             }
+
+            // Add ASCII bar visualization for first 2 rotations
+            var barVisualization = barVisualizer.CreateBarVisualization(riderName, steps, powerPlans.Count, rotations);
+            barVisualizer.RenderToConsole(barVisualization);
             
             riderIndex++;
         }
+
+        // Show legend after all riders
+        barVisualizer.RenderLegend();
 
         Console.WriteLine();
 
