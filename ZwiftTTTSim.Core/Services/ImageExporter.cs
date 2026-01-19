@@ -168,7 +168,7 @@ public class ImageExporter
                 >= 1.05 => new SKColor(244, 125, 66),     // Orange #f47d42 for VO2 Max
                 >= 0.90 => new SKColor(244, 197, 66),     // Yellow #f4c542 for Threshold
                 >= 0.75 => new SKColor(90, 181, 94),      // Green #5ab55e for Tempo
-                >= 0.60 => new SKColor(74, 155, 155),     // Teal #4a9b9b for Endurance
+                >= 0.60 => new SKColor(74, 144, 226),     // Blue #4a90e2 for Endurance
                 _ => new SKColor(128, 128, 128)           // Grey #808080 for Recovery
             };
 
@@ -268,7 +268,7 @@ public class ImageExporter
             (Color: new SKColor(244, 125, 66), Text: "VO2 Max (>= 1.05)"),      // #f47d42
             (Color: new SKColor(244, 197, 66), Text: "Threshold (>= 0.90)"),    // #f4c542
             (Color: new SKColor(90, 181, 94), Text: "Tempo (>= 0.75)"),         // #5ab55e
-            (Color: new SKColor(74, 155, 155), Text: "Endurance (>= 0.60)"),    // #4a9b9b
+            (Color: new SKColor(74, 144, 226), Text: "Endurance (>= 0.60)"),    // #4a90e2
             (Color: new SKColor(128, 128, 128), Text: "Recovery (< 0.60)")      // #808080
         };
         
