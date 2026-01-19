@@ -115,11 +115,11 @@ In practice, the input data can be:
 
 ### Example Workout Visualizations
 
-**Alice's Workout** - Showcases Anaerobic, VO2 Max, Threshold, and Recovery zones:
+**Alice's Workout** - Showcases Anaerobic, Tempo, Threshold and VO2Max zones:
 
 ![Alice Workout Visualization](docs/images/sample_alice.png)
 
-**Bob's Workout** - Showcases Threshold, VO2 Max, Tempo, and Recovery zones:
+**Bob's Workout** - Showcases Threshold, VO2 Max, Recovery, and Endurance zones:
 
 ![Bob Workout Visualization](docs/images/sample_bob.png)
 
