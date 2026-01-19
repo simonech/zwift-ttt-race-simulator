@@ -8,8 +8,9 @@ namespace ZwiftTTTSim.Core.Services;
 /// </summary>
 public class ConsoleBarVisualizer
 {
-    private const int MaxBarWidth = 80;
+    private const int MaxBarHeight = 20;
     private const int MaxRotationsToShow = 2;
+    private const int BarWidth = 4; // Width of each vertical bar
     
     // Intensity zone thresholds (matching ImageExporter zones)
     private const double AnaerobicThreshold = 1.18;
@@ -50,43 +51,59 @@ public class ConsoleBarVisualizer
         // Get the subset of steps to visualize
         var visibleSteps = steps.Take(stepsToShow).ToList();
         
-        // Calculate total duration for the visible steps
-        var totalDuration = visibleSteps.Sum(s => s.DurationSeconds);
+        // Find max power to scale the bars
+        var maxPower = visibleSteps.Max(s => s.Power);
 
         // Header
         sb.AppendLine($"\n  Power Profile (First {rotationsToShow} Rotation{(rotationsToShow > 1 ? "s" : "")}):");
-        sb.Append("  ");
-
-        // Create the bar
-        foreach (var step in visibleSteps)
+        
+        // Draw the vertical bars from top to bottom
+        for (int row = MaxBarHeight; row > 0; row--)
         {
-            var barWidth = CalculateBarWidth(step.DurationSeconds, totalDuration);
-            var barChar = GetBarCharacter(step.Intensity);
-            var color = GetConsoleColor(step.Intensity);
+            sb.Append("  ");
             
-            // Append color code and bar segment
-            sb.Append($"{{COLOR:{color}}}");
-            sb.Append(new string(barChar, barWidth));
+            for (int i = 0; i < visibleSteps.Count; i++)
+            {
+                var step = visibleSteps[i];
+                var barHeight = CalculateBarHeight(step.Power, maxPower);
+                var barChar = GetBarCharacter(step.Intensity);
+                var color = GetConsoleColor(step.Intensity);
+                
+                // Determine if this row should show the bar
+                if (row <= barHeight)
+                {
+                    sb.Append($"{{COLOR:{color}}}");
+                    sb.Append(new string(barChar, BarWidth));
+                    sb.Append("{COLOR:RESET}");
+                }
+                else
+                {
+                    sb.Append(new string(' ', BarWidth));
+                }
+            }
+            
+            sb.AppendLine();
         }
         
-        // Reset color at the end
-        sb.AppendLine("{COLOR:RESET}");
+        // Draw baseline
+        sb.Append("  ");
+        sb.AppendLine(new string('─', visibleSteps.Count * BarWidth));
 
         return sb.ToString();
     }
 
     /// <summary>
-    /// Calculates the width of a bar segment based on its duration relative to total duration.
+    /// Calculates the height of a bar based on power relative to max power.
     /// </summary>
-    private int CalculateBarWidth(int durationSeconds, int totalDuration)
+    private int CalculateBarHeight(double power, double maxPower)
     {
-        if (totalDuration == 0)
+        if (maxPower == 0)
         {
             return 0;
         }
 
-        var proportionalWidth = (double)durationSeconds / totalDuration * MaxBarWidth;
-        return Math.Max(1, (int)Math.Round(proportionalWidth));
+        var proportionalHeight = (power / maxPower) * MaxBarHeight;
+        return Math.Max(1, (int)Math.Round(proportionalHeight));
     }
 
     /// <summary>
