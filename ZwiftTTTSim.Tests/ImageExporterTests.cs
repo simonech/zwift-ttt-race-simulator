@@ -196,4 +196,29 @@ public class ImageExporterTests
         Assert.NotEmpty(result);
         Assert.True(result.Length > 1000);
     }
+
+    [Fact]
+    public void ImageExporter_ShouldHandleRecoveryZonePower()
+    {
+        // Arrange
+        var exporter = new ImageExporter();
+        var steps = new List<WorkoutStep>
+        {
+            new WorkoutStep { DurationSeconds = 60, Power = 150 }, // Recovery zone power (assuming FTP ~300, this is ~50% FTP)
+            new WorkoutStep { DurationSeconds = 60, Power = 180 }, // Still recovery zone (~60% FTP)
+            new WorkoutStep { DurationSeconds = 60, Power = 300 }  // Higher power
+        };
+
+        // Act
+        var result = exporter.ExportToImage("TestRider", steps, 0, 3);
+
+        // Assert
+        Assert.NotEmpty(result);
+        Assert.True(result.Length > 1000);
+        // Verify PNG magic bytes
+        Assert.Equal(0x89, result[0]);
+        Assert.Equal(0x50, result[1]);
+        Assert.Equal(0x4E, result[2]);
+        Assert.Equal(0x47, result[3]);
+    }
 }
