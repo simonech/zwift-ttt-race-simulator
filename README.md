@@ -6,6 +6,8 @@ A workout generator for **Team Time Trial (TTT)** racing on Zwift (both ZRL and 
 
 While races are held on Zwift, the generated workouts can be used on **any cycling platform** that supports ERG-controlled trainers.
 
+📖 **[View the full documentation on our website](https://simonech.github.io/zwift-ttt-race-simulator/)**
+
 ---
 
 ## This is still a work in progress
