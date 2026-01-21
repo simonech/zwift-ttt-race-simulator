@@ -1,5 +1,10 @@
 ﻿using System.CommandLine;
+using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
+
+// NOTE:
+// This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
+// Later 2.x versions are API-incompatible.
 
 // Define CLI options
 var inputFileOption = new Option<FileInfo>(
@@ -48,8 +53,9 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         var powerPlans = parser.ParseCsv(csvContent);
 
         // Generate workouts
-        var workoutCreator = new WorkoutCreator();
-        var workouts = workoutCreator.CreateWorkouts(powerPlans, rotations);
+        var rotationComposer = new RotationComposer();
+        var pulls = rotationComposer.CreatePullsList(powerPlans, rotations);
+
 
         // Print workouts rider by rider
         Console.ForegroundColor = ConsoleColor.Cyan;
@@ -60,66 +66,47 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         Console.WriteLine($"Input File: {inputFile.Name}");
         Console.WriteLine($"Team Size: {powerPlans.Count} riders");
         Console.WriteLine($"Rotations: {rotations}");
-        Console.WriteLine($"Total Steps per Rider: {workouts.First().Value.Count}");
+        Console.WriteLine($"Total Steps per Rider: {pulls.Count / powerPlans.Count}");
         Console.WriteLine();
 
-        int riderIndex = 0;
-        var riderColors = new[] { ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Magenta, ConsoleColor.Blue, ConsoleColor.Red, ConsoleColor.Cyan };
-        var barVisualizer = new ConsoleBarVisualizer();
 
-        foreach (var (riderName, steps) in workouts)
+        foreach (var pull in pulls)
         {
-            Console.ForegroundColor = riderColors[riderIndex % riderColors.Length];
-            Console.WriteLine($"\n═══ Workout for {riderName} ═══");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine($"{"Step",-6} {"Position",-10} {"Duration (s)",-14} {"Power (W)",-12}");
-            Console.WriteLine(new string('─', 45));
-            Console.ResetColor();
-            
-            for (int i = 0; i < steps.Count; i++)
+            Console.WriteLine($"Pull {pull.PullNumber}: Duration {pull.PullDuration.TotalSeconds} seconds");
+            foreach (var position in pull.PullPositions)
             {
-                var pullingRiderIndex = i % powerPlans.Count;
-                var position = (riderIndex - pullingRiderIndex + powerPlans.Count) % powerPlans.Count + 1;
-                
-                // Color position based on effort (1=pulling hard, 2-3=moderate, 4+=easy)
-                Console.Write($"{i + 1,-6} ");
-                Console.ForegroundColor = position switch
-                {
-                    1 => ConsoleColor.Red,
-                    2 or 3 => ConsoleColor.Yellow,
-                    _ => ConsoleColor.Green
-                };
-                Console.Write($"{position,-10}");
-                Console.ResetColor();
-                Console.Write($" {steps[i].DurationSeconds,-14}");
-                
-                // Color power based on intensity
-                var powerColor = steps[i].Intensity switch
-                {
-                    >= 1.18 => ConsoleColor.Red,
-                    >= 1.05 => ConsoleColor.Magenta,
-                    >= 0.90 => ConsoleColor.Yellow,
-                    >= 0.75 => ConsoleColor.Green,
-                    >= 0.60 => ConsoleColor.Blue,
-                    _ => ConsoleColor.DarkGray
-                };
-                Console.ForegroundColor = powerColor;
-                Console.WriteLine($" {steps[i].Power,-12}");
-                Console.ResetColor();
+                Console.WriteLine($"  Position {position.PositionInPull + 1}: Rider {position.Rider.Name}, Target Power {position.TargetPower} W");
             }
-
-            // Add ASCII bar visualization for first 2 rotations
-            var barVisualization = barVisualizer.CreateBarVisualization(riderName, steps, powerPlans.Count, rotations);
-            barVisualizer.RenderToConsole(barVisualization);
-            
-            riderIndex++;
         }
 
-        // Show legend after all riders
-        barVisualizer.RenderLegend();
+        var sampleWorkout = new List<WorkoutStep>()
+        {
+            new WorkoutStep
+            {
+                DurationSeconds = 300,
+                Power = 100,
+                Intensity = 0.5
+            },
+            new WorkoutStep
+            {
+                DurationSeconds = 600,
+                Power = 200,
+                Intensity = 0.75
+            },
+            new WorkoutStep
+            {
+                DurationSeconds = 300,
+                Power = 150,
+                Intensity = 0.6
+            }
+        };
 
-        Console.WriteLine();
+        Dictionary<string, List<WorkoutStep>> workouts = new Dictionary<string, List<WorkoutStep>>()
+        {
+            { "Rider 1", sampleWorkout },
+            { "Rider 2", sampleWorkout },
+            { "Rider 3", sampleWorkout }
+        };
 
         // Export workouts to ZWO files
         var exporter = new ZwoExporter();

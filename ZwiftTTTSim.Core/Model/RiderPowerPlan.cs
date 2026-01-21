@@ -1,8 +1,18 @@
 namespace ZwiftTTTSim.Core.Model;
 
+/// <summary>
+/// Represents a rider's power plan for different positions in a team time trial simulation.
+/// </summary>
 public class RiderPowerPlan
 {
+    /// <summary>
+    /// Gets or sets the name of the rider.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the duration of each pull in the rotation.
+    /// </summary>
     public TimeSpan PullDuration { get; set; }
     // PowerByPosition mapping:
     // [0] = power when rider is in 1st position (pulling)
@@ -11,6 +21,9 @@ public class RiderPowerPlan
     // [3] = power for 4th and all later positions (positions >= 4 use the last entry)
     public int[] PowerByPosition { get; set; } = [];
 
+    /// <summary>
+    /// Gets or sets the rider's essential data.
+    /// </summary>
     public RiderData Rider { get; set; } = new RiderData();
 
     /// <summary>

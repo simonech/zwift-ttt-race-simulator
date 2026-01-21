@@ -9,23 +9,29 @@ applyTo: **/*.cs
 
 This project generates **one workout file per rider** simulating a Team Time Trial rotation. The data flow is:
 
-**CSV Input** → **CsvParser** (parse rider data) → **WorkoutCreator** (simulate rotation) → **ZwoExporter** / **ImageExporter** (output)
+**CSV Input** → **CsvParser** (parse rider data) → **RotationComposer** (simulate rotation) → **Workout Converter** (format by rider) → **ZwoExporter** / **ImageExporter** (output)
 
 ### Key Components
 
-- **Model layer** (`ZwiftTTTSim.Core/Model/`): Data structures for rider state and workouts
-  - `RiderPowerPlan`: Encodes a rider's pull duration and power targets for each rotation position (1st=pulling, 2nd, 3rd, 4th+)
-  - `WorkoutStep`: Duration + power pair representing a single interval in a rider's workout
+- **Model layer** (`ZwiftTTTSim.Core/Model/`): Domain models representing the rotation hierarchy
+  - `RiderPowerPlan`: Complete rider state including name, pull duration, power targets per position (1st=pulling, 2nd, 3rd, 4th+), and embedded `RiderData`
   - `RiderData`: Rider metadata (FTP, weight) used to calculate intensity as power/FTP ratio
+  - `Pull` (new): Represents one complete rotation cycle with a pulling rider and all other riders in their positions
+  - `PullPosition` (new): Represents a single rider's state within a pull (which rider, their position, target power for that position)
+  - `WorkoutStep`: Duration + power pair; used internally for export conversion
   
 - **Services layer** (`ZwiftTTTSim.Core/Services/`): Business logic
-  - `WorkoutCreator`: **Core simulation logic** - rotates riders through positions, assigning power targets per position per step
+  - `RotationComposer`: **Core simulation logic** - orchestrates the rotation sequence by generating a list of `Pull` objects, each representing one complete rotation cycle
   - `CsvParser`: Parses rider input (7 fields: name, weight, FTP, pull duration, then 4 power values for positions 1-4+)
-  - Exporters: Generate output files (ZWO XML workouts, PNG visualizations)
+  - Exporters: Generate output files (ZWO XML workouts, PNG visualizations) from `Pull` structures
 
-### Critical Pattern: Position-Based Power Assignment
+### Critical Pattern: Hierarchical Rotation Model
 
-`WorkoutCreator.CreateWorkouts()` rotates riders through a paceline, moving the pull leader to the back each rotation. **Critically**, each rider's power for each step is determined by their current position via `GetPowerByPosition(position)` — not by who they're following. See `RiderPowerPlanTests.cs` for position lookups beyond position 4 returning the last defined power value.
+`RotationComposer.CreatePullsList()` generates a `List<Pull>` representing the entire rotation sequence. Each `Pull` contains all riders in their current positions with durations and target powers determined by their position and the pulling rider's pull duration. The key insight:
+
+- **One Pull = One Complete Rotation Cycle**: A pull groups all riders simultaneously, reflecting the physical reality of team time trials
+- **Position-Based Power**: Each rider's power in a pull is determined by their current position via `RiderPowerPlan.GetPowerByPosition(position)` — not by rider identity
+- **Position Clamping**: Lookups beyond position 4 return the last defined power value (see `RiderPowerPlanTests.cs`)
 
 ## Coding Standards
 
@@ -36,18 +42,27 @@ This project generates **one workout file per rider** simulating a Team Time Tri
 - **File-scoped namespaces** only; never use block-scoped
 - No regions; keep methods focused (~20 line max before refactoring)
 
-### Documentation & Testing
+### Testing the Domain Model
+
+- **xUnit framework** for tests; use descriptive test names indicating scenario
+- **RotationComposerTests**: Comprehensive theory and fact tests covering:
+  - Pull count verification (riders × rotations)
+  - Power assignment correctness by position
+  - Duration tracking per pull
+  - Position clamping edge cases (position 4+)
+  - Multi-rotation cycle repeatability
+- Tests must be independent and runnable in any order
+- Theory tests should cover meaningful team size/rotation combinations (e.g., 4/6/8 riders × 1-3 rotations)
+
+### Documentation
 
 - **XML doc comments** for all public members describing purpose, parameters, returns
-- **xUnit framework** for tests; use descriptive test names indicating scenario
-- Write tests for all public methods and critical paths (e.g., rotation logic edge cases, position lookups beyond 4th rider)
-- Tests must be independent and runnable in any order
 
 ### Error Handling
 
 - Use meaningful exception messages for invalid inputs (e.g., CsvParser validates 7+ CSV fields per line)
 - Throw custom exceptions when appropriate; avoid generic Exception
-- Validate inputs early in business logic (see TODO comments in `WorkoutCreator`)
+- Validate inputs early in business logic (see TODO comments in `RotationComposer`)
 
 ## Development Workflows
 
