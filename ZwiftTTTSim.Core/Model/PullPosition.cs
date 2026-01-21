@@ -17,5 +17,5 @@ public class PullPosition
     /// <summary>
     /// Gets or sets the target power for the rider in this position.
     /// </summary>
-    public double TargetPower {get; set; }
+    public double TargetPower { get; set; }
 }

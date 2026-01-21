@@ -53,8 +53,8 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         var powerPlans = parser.ParseCsv(csvContent);
 
         // Generate workouts
-        var pulledComposer = new RotationComposer();
-        var pulls = pulledComposer.CreatePullsList(powerPlans, rotations);
+        var rotationComposer = new RotationComposer();
+        var pulls = rotationComposer.CreatePullsList(powerPlans, rotations);
 
 
         // Print workouts rider by rider
@@ -66,7 +66,7 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         Console.WriteLine($"Input File: {inputFile.Name}");
         Console.WriteLine($"Team Size: {powerPlans.Count} riders");
         Console.WriteLine($"Rotations: {rotations}");
-        Console.WriteLine($"Total Steps per Rider: {pulls.Count}");
+        Console.WriteLine($"Total Steps per Rider: {pulls.Count / powerPlans.Count}");
         Console.WriteLine();
 
 

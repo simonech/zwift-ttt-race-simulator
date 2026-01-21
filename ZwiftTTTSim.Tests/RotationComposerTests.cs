@@ -219,7 +219,7 @@ public class RotationComposerTests
             },
             new RiderPowerPlan
             {
-                Name = "Steady",
+                Name = "Steady1",
                 PullDuration = TimeSpan.FromSeconds(40),
                 PowerByPosition = [350, 290, 240, 190],
                 Rider = new RiderData { FTP = 300, Weight = 75 }
