@@ -72,11 +72,11 @@ public class RotationComposerTests
 
             var pullPositions = pull.PullPositions;
 
-            foreach (var currentPull in pullPositions)
+            foreach (var currentPosition in pullPositions)
             {
-                var currentRider = currentPull.Rider;
-                var expectedPower = currentRider.GetPowerByPosition(currentPull.PositionInPull);
-                Assert.Equal(expectedPower, currentPull.TargetPower);
+                var currentRider = currentPosition.Rider;
+                var expectedPower = currentRider.GetPowerByPosition(currentPosition.PositionInPull);
+                Assert.Equal(expectedPower, currentPosition.TargetPower);
             }
         }
     }
