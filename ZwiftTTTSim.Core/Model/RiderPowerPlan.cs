@@ -24,7 +24,7 @@ public class RiderPowerPlan
     /// <summary>
     /// Gets or sets the rider's essential data.
     /// </summary>
-    public RiderData Rider { get; set; } = new RiderData();
+    public RiderData RiderData { get; set; } = new RiderData();
 
     /// <summary>
     /// Gets the power value for a specific position in the rotation.

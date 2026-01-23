@@ -2,7 +2,7 @@ using System.Globalization;
 using SkiaSharp;
 using ZwiftTTTSim.Core.Model;
 
-namespace ZwiftTTTSim.Core.Services;
+namespace ZwiftTTTSim.Core.Exporters;
 
 public class ImageExporter
 {
@@ -332,7 +332,7 @@ public class ImageExporter
         }
 
         // Create dictionary lookup for better performance
-        var ftpLookup = powerPlans?.ToDictionary(p => p.Name, p => p.Rider.FTP) ?? new Dictionary<string, double>();
+        var ftpLookup = powerPlans?.ToDictionary(p => p.Name, p => p.RiderData.FTP) ?? new Dictionary<string, double>();
 
         var riderIndex = 0;
         foreach (var (riderName, steps) in workouts)

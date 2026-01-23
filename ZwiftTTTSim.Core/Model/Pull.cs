@@ -18,6 +18,6 @@
         /// <summary>
         /// Gets or sets the list of positions for this pull. This list contains the riders and their respective positions and target powers.
         /// </summary>
-        public required List<PullPosition> PullPositions { get; init; }
+        public required List<PacelinePosition> PacelinePositions { get; init; }
 
     }

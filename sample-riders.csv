@@ -1,8 +1,8 @@
 # Sample rider data for Zwift TTT Race Simulator
 # RiderName, Weight, FTP, Pull Duration, Pull Power, Wheel2Power, Wheel3Power, DraftPower
-Willem, 74, 299, 90, 350, 235, 257, 249
-Roel, 81, 315, 90, 365, 305, 227, 254
-Bert, 75, 290, 60, 355, 291, 265, 206
-Yves, 78, 290, 45, 355, 292, 265, 249
-Peter, 78, 287, 45, 350, 299, 271, 254
-Jonas, 108, 284, 30, 320, 336, 316, 294
+Roel, 81, 324, 60, 400, 320, 297, 284
+Willem, 74, 306, 60, 375, 316, 280, 267
+Yves, 78, 302, 45, 375, 312, 291, 266
+Bert, 75, 301, 45, 375, 315, 288, 277
+Nico, 84, 314, 45, 375, 325, 302, 284
+

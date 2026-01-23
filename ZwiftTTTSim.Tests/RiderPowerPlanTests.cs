@@ -21,7 +21,7 @@ public class RiderPowerPlanTests
                 Name = "Alice",
                 PullDuration = TimeSpan.FromSeconds(30),
                 PowerByPosition = [350, 300, 280, 250],
-                Rider = new RiderData { FTP = 300, Weight = 70 }
+                RiderData = new RiderData { FTP = 300, Weight = 70 }
             };
 
         // Act
@@ -40,7 +40,7 @@ public class RiderPowerPlanTests
             Name = "Bob",
             PullDuration = TimeSpan.FromSeconds(30),
             PowerByPosition = [350, 300, 280, 250],
-            Rider = new RiderData { FTP = 300, Weight = 70 }
+            RiderData = new RiderData { FTP = 300, Weight = 70 }
         };
 
         // Act & Assert
@@ -57,7 +57,7 @@ public class RiderPowerPlanTests
             Name = "Charlie",
             PullDuration = TimeSpan.FromSeconds(30),
             PowerByPosition = [],
-            Rider = new RiderData { FTP = 300, Weight = 70 }
+            RiderData = new RiderData { FTP = 300, Weight = 70 }
         };
 
         // Act & Assert
