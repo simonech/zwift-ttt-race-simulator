@@ -1,5 +1,8 @@
-using ZwiftTTTSim.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
+namespace ZwiftTTTSim.Core.Model;
 /// <summary>
 /// Represents the complete paceline rotation plan for a team, including
 /// the sequence of pulls and the aggregate duration of the plan.
