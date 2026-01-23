@@ -2,16 +2,15 @@ using ZwiftTTTSim.Core.Model;
 
 namespace ZwiftTTTSim.Core.Services;
 
-public class RotationComposer
+public class PacelinePlanComposer
 {
     /// <summary>
-    /// Creates a list of Pulls based on the provided RiderPowerPlans and number of rotations.
-    /// Each Pull represents a rotation with riders in specific positions and their target powers.
+    /// Creates a PacelinePlan based on the provided rider power plans and number of rotations.
     /// </summary>
-    /// <param name="powerPlans">List of RiderPowerPlan representing each rider's power plan.</param>
+    /// <param name="powerPlans">List of RiderPowerPlan objects representing each rider's power plan.</param>
     /// <param name="rotations">Number of rotations to simulate.</param>
-    /// <returns>List of Pull objects representing the entire rotation sequence.</returns>
-    public List<Pull> CreatePullsList(List<RiderPowerPlan> powerPlans, int rotations)
+    /// <returns>PacelinePlan object representing the entire race plan.</returns>
+    public PacelinePlan CreatePlan(List<RiderPowerPlan> powerPlans, int rotations)
     {
 
         //TODO: Validate input
@@ -23,7 +22,7 @@ public class RotationComposer
         // - names are unique
         // Throw exceptions if any validation fails
         
-        var pullsList = new List<Pull>();
+        var plan = new PacelinePlan();
 
         // Clone the list to maintain original order during rotations
         var rotationOrder = new List<RiderPowerPlan>(powerPlans);
@@ -40,7 +39,7 @@ public class RotationComposer
             {
                 PullNumber = pull + 1,
                 PullDuration = pullDuration,
-                PullPositions = new List<PullPosition>()
+                PacelinePositions = new List<PacelinePosition>()
             };
 
             for (int position = 0; position < rotationOrder.Count; position++)
@@ -49,21 +48,19 @@ public class RotationComposer
 
                 var targetPower = currentRider.GetPowerByPosition(position);
 
-                //TODO: remove SetIntensity from rotation logic and move to export logic (see comment in WorkoutStep.cs)
-                //step.SetIntensity(currentRider.Rider.FTP);
-                currentPull.PullPositions.Add(new PullPosition
+                currentPull.PacelinePositions.Add(new PacelinePosition
                 {
                     Rider = currentRider,
                     PositionInPull = position,
                     TargetPower = targetPower
                 });
             }
-            pullsList.Add(currentPull);
+            plan.Pulls.Add(currentPull);
             // Move the leader to the end of the rotation
             rotationOrder.Add(rotationOrder[0]);
             rotationOrder.RemoveAt(0);
         }
 
-        return pullsList;
+        return plan;
     }
 }

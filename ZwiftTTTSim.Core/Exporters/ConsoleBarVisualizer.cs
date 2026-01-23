@@ -1,7 +1,7 @@
 using System.Text;
 using ZwiftTTTSim.Core.Model;
 
-namespace ZwiftTTTSim.Core.Services;
+namespace ZwiftTTTSim.Core.Exporters;
 
 /// <summary>
 /// Generates ASCII bar visualizations for workout power profiles in the console.

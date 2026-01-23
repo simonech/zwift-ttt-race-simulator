@@ -47,7 +47,7 @@ public class CsvParser
                 Name = name,
                 PullDuration = TimeSpan.FromSeconds(pullDurationSeconds),
                 PowerByPosition = powerByPosition,
-                Rider = new RiderData 
+                RiderData = new RiderData 
                 { 
                     FTP = ftp, 
                     Weight = weight 

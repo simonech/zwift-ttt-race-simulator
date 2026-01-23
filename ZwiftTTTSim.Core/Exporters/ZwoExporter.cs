@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using ZwiftTTTSim.Core.Model;
 
-namespace ZwiftTTTSim.Core.Services;
+namespace ZwiftTTTSim.Core.Exporters;
 
 public class ZwoExporter
 {

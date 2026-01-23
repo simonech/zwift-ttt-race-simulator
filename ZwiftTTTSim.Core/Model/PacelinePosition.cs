@@ -3,7 +3,7 @@ namespace ZwiftTTTSim.Core.Model;
 /// <summary>
 /// Represents a position within a pull, including the rider, their position, and target power.
 /// </summary>
-public class PullPosition
+public class PacelinePosition
 {
     /// <summary>
     /// Gets or sets the rider associated with this position.

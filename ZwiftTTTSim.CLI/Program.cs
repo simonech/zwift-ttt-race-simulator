@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
+using ZwiftTTTSim.Core.Exporters;
 
 // NOTE:
 // This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
@@ -53,60 +54,35 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         var powerPlans = parser.ParseCsv(csvContent);
 
         // Generate workouts
-        var rotationComposer = new RotationComposer();
-        var pulls = rotationComposer.CreatePullsList(powerPlans, rotations);
+        var pacelinePlanComposer = new PacelinePlanComposer();
+        var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
 
 
         // Print workouts rider by rider
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n╔══════════════════════════════════════╗");
-        Console.WriteLine("║  Zwift TTT Race Simulator           ║");
+        Console.WriteLine();
+        Console.WriteLine("╔══════════════════════════════════════╗");
+        Console.WriteLine("║  Zwift TTT Race Simulator            ║");
         Console.WriteLine("╚══════════════════════════════════════╝");
         Console.ResetColor();
         Console.WriteLine($"Input File: {inputFile.Name}");
         Console.WriteLine($"Team Size: {powerPlans.Count} riders");
         Console.WriteLine($"Rotations: {rotations}");
-        Console.WriteLine($"Total Steps per Rider: {pulls.Count / powerPlans.Count}");
+        Console.WriteLine($"Total Steps per Rider: {plan.Pulls.Count / powerPlans.Count}");
         Console.WriteLine();
 
 
-        foreach (var pull in pulls)
+        foreach (var pull in plan.Pulls)
         {
             Console.WriteLine($"Pull {pull.PullNumber}: Duration {pull.PullDuration.TotalSeconds} seconds");
-            foreach (var position in pull.PullPositions)
+            foreach (var position in pull.PacelinePositions)
             {
                 Console.WriteLine($"  Position {position.PositionInPull + 1}: Rider {position.Rider.Name}, Target Power {position.TargetPower} W");
             }
         }
 
-        var sampleWorkout = new List<WorkoutStep>()
-        {
-            new WorkoutStep
-            {
-                DurationSeconds = 300,
-                Power = 100,
-                Intensity = 0.5
-            },
-            new WorkoutStep
-            {
-                DurationSeconds = 600,
-                Power = 200,
-                Intensity = 0.75
-            },
-            new WorkoutStep
-            {
-                DurationSeconds = 300,
-                Power = 150,
-                Intensity = 0.6
-            }
-        };
-
-        Dictionary<string, List<WorkoutStep>> workouts = new Dictionary<string, List<WorkoutStep>>()
-        {
-            { "Rider 1", sampleWorkout },
-            { "Rider 2", sampleWorkout },
-            { "Rider 3", sampleWorkout }
-        };
+        var projector = new WorkoutProjector();
+        var workouts = projector.Project(plan);
 
         // Export workouts to ZWO files
         var exporter = new ZwoExporter();

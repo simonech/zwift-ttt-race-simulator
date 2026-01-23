@@ -13,28 +13,28 @@ public static class TestData
                 Name = "Alice",
                 PullDuration = TimeSpan.FromSeconds(30),
                 PowerByPosition = [ 350, 300, 280, 250 ],
-                Rider = new RiderData { FTP = 300, Weight = 70 }
+                RiderData = new RiderData { FTP = 300, Weight = 70 }
             },
             new RiderPowerPlan
             {
                 Name = "Bob",
                 PullDuration = TimeSpan.FromSeconds(45),
                 PowerByPosition = [ 330, 290, 270, 240 ],
-                Rider = new RiderData { FTP = 280, Weight = 75 },
+                RiderData = new RiderData { FTP = 280, Weight = 75 },
             },
             new RiderPowerPlan
             {
                 Name = "Charlie",
                 PullDuration = TimeSpan.FromSeconds(60),
                 PowerByPosition = [ 370, 320, 300, 270 ],
-                Rider = new RiderData { FTP = 320, Weight = 72 }
+                RiderData = new RiderData { FTP = 320, Weight = 72 }
             },
             new RiderPowerPlan
             {
                 Name = "Diana",
                 PullDuration = TimeSpan.FromSeconds(90),
                 PowerByPosition = [ 340, 310, 290, 260 ],
-                Rider = new RiderData { FTP = 290, Weight = 68 }
+                RiderData = new RiderData { FTP = 290, Weight = 68 }
             }
         };
     }
@@ -47,14 +47,14 @@ public static class TestData
             Name = "Simone",
             PullDuration = TimeSpan.FromSeconds(45),
             PowerByPosition = [280, 260, 230, 200],
-            Rider = new RiderData { FTP = 260, Weight = 98 }
+            RiderData = new RiderData { FTP = 260, Weight = 98 }
         });
         list.Add(new RiderPowerPlan
         {
             Name = "Eve",
             PullDuration = TimeSpan.FromSeconds(40),
             PowerByPosition = [310, 280, 250, 220],
-            Rider = new RiderData { FTP = 310, Weight = 65 }
+            RiderData = new RiderData { FTP = 310, Weight = 65 }
         });
         return list;
     }
@@ -67,14 +67,14 @@ public static class TestData
             Name = "Frank",
             PullDuration = TimeSpan.FromSeconds(35),
             PowerByPosition = [300, 270, 240, 210],
-            Rider = new RiderData { FTP = 300, Weight = 80 }
+            RiderData = new RiderData { FTP = 300, Weight = 80 }
         });
         list.Add(new RiderPowerPlan
         {
             Name = "Grace",
             PullDuration = TimeSpan.FromSeconds(50),
             PowerByPosition = [320, 290, 260, 230],
-            Rider = new RiderData { FTP = 320, Weight = 68 }
+            RiderData = new RiderData { FTP = 320, Weight = 68 }
         });
         return list;
     }

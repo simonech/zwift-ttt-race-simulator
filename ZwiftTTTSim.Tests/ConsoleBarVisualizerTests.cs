@@ -1,6 +1,6 @@
 using Xunit;
 using ZwiftTTTSim.Core.Model;
-using ZwiftTTTSim.Core.Services;
+using ZwiftTTTSim.Core.Exporters;
 
 namespace ZwiftTTTSim.Tests;
 
