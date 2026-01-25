@@ -111,19 +111,33 @@ Charlie, 72, 320, 60, 370, 320, 300, 270</code></pre>
             <p>A sample CSV file (<code>sample-riders.csv</code>) is included in the repository.</p>
 
             <h3>CLI Usage</h3>
-            <pre><code>dotnet run --project ZwiftTTTSim.CLI -- --input &lt;csv-file&gt; [--output &lt;folder&gt;] [--rotations &lt;count&gt;]</code></pre>
+            <pre><code>dotnet run --project ZwiftTTTSim.CLI -- --input &lt;csv-file&gt; [--output &lt;folder&gt;] [--rotations &lt;count&gt;] [--format &lt;format&gt;] [--verbose] [--quiet] [--dry-run] [--no-logo]</code></pre>
             <p><strong>Options:</strong></p>
             <ul>
                 <li><code>-i, --input &lt;file&gt;</code> (Required): Path to the CSV file containing rider data</li>
                 <li><code>-o, --output &lt;folder&gt;</code>: Output folder for workout files (default: <code>workouts</code>)</li>
                 <li><code>-r, --rotations &lt;count&gt;</code>: Number of rotations for the workout (default: <code>5</code>)</li>
+                <li><code>--format &lt;format&gt;</code>: Output file format(s): <code>zwo</code>, <code>image</code> (can specify multiple)</li>
+                <li><code>--verbose</code>: Enable verbose logging with detailed pipeline information</li>
+                <li><code>--quiet</code>: Enable quiet mode - only print workflow steps without details</li>
+                <li><code>--dry-run</code>: Perform a dry run without generating files</li>
+                <li><code>--no-logo</code>: Suppress the program logo display</li>
             </ul>
-            <p><strong>Example:</strong></p>
-            <pre><code># Generate workouts with default settings (5 rotations, output to 'workouts' folder)
-dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv
+            <p><strong>Examples:</strong></p>
+            <pre><code># Generate workouts with default settings (5 rotations, ZWO format)
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo
 
-# Generate workouts with custom settings
-dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10</code></pre>
+# Generate workouts with custom settings and visualizations
+dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10 --format zwo image
+
+# Verbose output with detailed information
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo --verbose
+
+# Dry run without generating files
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --dry-run
+
+# Quiet mode with minimal output
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo image --quiet</code></pre>
             <p>In practice, the input data can be:</p>
             <ul>
                 <li>Hand-crafted based on team strategy</li>
@@ -171,6 +185,47 @@ dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10</co
                         <li>⚫ Gray: Recovery (&lt; 0.60 × FTP)</li>
                     </ul>
                 </li>
+            </ul>
+        </section>
+
+        <section id="architecture">
+            <h2>🏗️ Architecture</h2>
+            <p>The simulator uses a layered architecture with clear separation of concerns:</p>
+            <pre><code>CSV Input → CsvParser → PacelinePlanComposer → WorkoutProjector → ZwoExporter / ImageExporter</code></pre>
+
+            <h3>Key Components</h3>
+            <ul>
+                <li><strong>Model Layer</strong> - Domain models representing the race structure:
+                    <ul>
+                        <li><code>PacelinePlan</code>: Complete race plan with all pulls and total duration</li>
+                        <li><code>Pull</code>: One complete rotation cycle</li>
+                        <li><code>PacelinePosition</code>: A rider's state within a pull</li>
+                        <li><code>RiderPowerPlan</code>: Rider data with pull duration and position-based power values</li>
+                        <li><code>WorkoutStep</code>: Duration + power pair for export</li>
+                    </ul>
+                </li>
+                <li><strong>Services Layer</strong> - Business logic:
+                    <ul>
+                        <li><code>PacelinePlanComposer</code>: Orchestrates rotation sequence and generates the complete race plan</li>
+                        <li><code>WorkoutProjector</code>: Transforms race plans into rider-specific workout steps</li>
+                        <li><code>CsvParser</code>: Parses rider input CSV files</li>
+                    </ul>
+                </li>
+                <li><strong>Exporters Layer</strong> - Output generation:
+                    <ul>
+                        <li><code>ZwoExporter</code>: Generates Zwift-compatible XML workout files</li>
+                        <li><code>ImageExporter</code>: Creates PNG visualizations of power profiles</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Design Pattern</h3>
+            <p><strong>One Pull = One Complete Rotation Cycle</strong></p>
+            <ul>
+                <li>Each <code>Pull</code> represents all riders in their current positions</li>
+                <li>Position-based power is determined by <code>RiderPowerPlan.GetPowerByPosition()</code></li>
+                <li>Power values beyond position 4 use the 4th position value (position clamping)</li>
+                <li>The pulling rider's pull duration determines the block duration for all riders</li>
             </ul>
         </section>
 
