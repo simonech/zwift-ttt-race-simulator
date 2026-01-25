@@ -65,7 +65,7 @@ var formatsOption = new Option<string[]>(
             result.ErrorMessage = $"Invalid format(s): {string.Join(", ", invalidFormats)}. Supported formats are: zwo, image.";
             return Array.Empty<string>();
         }
-        return formats;
+        return formats.Distinct().ToArray();
     })
 { AllowMultipleArgumentsPerToken = true };
 
