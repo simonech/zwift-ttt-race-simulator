@@ -57,7 +57,7 @@ var formatsOption = new Option<string[]>(
     parseArgument: result =>
     {
         var validFormats = new[] { "zwo", "image" };
-        var formats = result.Tokens.Select(t => t.Value.ToLower()).ToArray();
+        var formats = result.Tokens.Select(t => t.Value.ToLowerInvariant()).ToArray();
         
         var invalidFormats = formats.Where(f => !validFormats.Contains(f)).Distinct().ToArray();
         if (invalidFormats.Any())
