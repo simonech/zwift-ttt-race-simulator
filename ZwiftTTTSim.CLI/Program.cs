@@ -3,6 +3,8 @@ using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
 using ZwiftTTTSim.Core.Exporters;
 using System.Reflection;
+using System.CommandLine.Builder;
+using System.CommandLine.Parsing;
 
 // NOTE:
 // This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
@@ -103,8 +105,7 @@ rootCommand.AddValidator(commandResult =>
     }
     catch (InvalidOperationException)
     {
-        // Format validation already failed in parseArgument, skip this validator
-        // The error message from parseArgument will be displayed
+        // Skip if format parsing failed (error already reported)
         return;
     }
 
@@ -308,7 +309,10 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
     }
 }, inputFileOption, rotationsOption, outputFolderOption, formatsOption, dryRunOption, verboseOption, quietOption, noLogoOption);
 
-return await rootCommand.InvokeAsync(args);
+return await new CommandLineBuilder(rootCommand)
+    .UseDefaults()  // Adds standard middleware
+    .Build()
+    .InvokeAsync(args);
 
 void PrintHeader()
 {
