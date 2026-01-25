@@ -29,7 +29,6 @@ This project generates **one workout file per rider** simulating a Team Time Tri
 - **Exporters layer** (`ZwiftTTTSim.Core/Exporters/`): Output generation
   - `ZwoExporter`: Generates Zwift-compatible XML workout files from `WorkoutStep` collections
   - `ImageExporter`: Creates PNG visualizations showing power profiles with zone color-coding
-  - `ConsoleBarVisualizer`: Renders ASCII power profiles in the console
 
 ### Critical Pattern: Hierarchical Rotation Model
 
