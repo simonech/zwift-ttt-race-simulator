@@ -49,7 +49,7 @@ outputFolderOption.AddAlias("-o");
 
 var formatsOption = new Option<string[]>(
     name: "--format",
-    description: "Output file format: zwo, erg, image")
+    description: "Output file format: zwo, image")
 { AllowMultipleArgumentsPerToken = true };
 
 var dryRunOption = new Option<bool>(
