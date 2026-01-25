@@ -51,7 +51,20 @@ outputFolderOption.AddAlias("-o");
 
 var formatsOption = new Option<string[]>(
     name: "--format",
-    description: "Output file format: zwo, image")
+    description: "Output file format: zwo, image",
+    parseArgument: result =>
+    {
+        var validFormats = new[] { "zwo", "image" };
+        var formats = result.Tokens.Select(t => t.Value.ToLower()).ToArray();
+        
+        var invalidFormats = formats.Where(f => !validFormats.Contains(f)).Distinct().ToArray();
+        if (invalidFormats.Any())
+        {
+            result.ErrorMessage = $"Invalid format(s): {string.Join(", ", invalidFormats)}. Supported formats are: zwo, image.";
+            return Array.Empty<string>();
+        }
+        return formats;
+    })
 { AllowMultipleArgumentsPerToken = true };
 
 var dryRunOption = new Option<bool>(
@@ -74,8 +87,41 @@ var noLogoOption = new Option<bool>(
     description: "Suppress the display of the program logo (default: false).",
     getDefaultValue: () => false);
 
-//TODO: add validation for formatsOption to accept only known formats and make them required if --dry-run is not set
-//TODO: add validation so that if verbose is set, quiet cannot be set and viceversa
+
+rootCommand.AddValidator(commandResult =>
+{
+    var dryRun = commandResult.GetValueForOption(dryRunOption);
+    
+    
+    try
+    {
+        var formats = commandResult.GetValueForOption(formatsOption);
+        if (!dryRun && (formats == null || formats.Length == 0))
+        {
+            commandResult.ErrorMessage = "Option --format is required unless --dry-run is specified.";
+        }
+    }
+    catch (InvalidOperationException)
+    {
+        // Format validation already failed in parseArgument, skip this validator
+        // The error message from parseArgument will be displayed
+        return;
+    }
+
+});
+
+
+// Add validator for mutually exclusive verbose/quiet and format requirement
+rootCommand.AddValidator(commandResult =>
+{
+    var verbose = commandResult.GetValueForOption(verboseOption);
+    var quiet = commandResult.GetValueForOption(quietOption);
+    
+    if (verbose && quiet)
+    {
+        commandResult.ErrorMessage = "Options --verbose and --quiet cannot be used together.";
+    }
+});
 
 rootCommand.AddOption(inputFileOption);
 rootCommand.AddOption(rotationsOption);
@@ -190,7 +236,7 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
             }
             foreach (var format in formats)
             {
-                switch (format.ToLower())
+                switch (format)
                 {
                     case "zwo":
                         if(!quiet)
