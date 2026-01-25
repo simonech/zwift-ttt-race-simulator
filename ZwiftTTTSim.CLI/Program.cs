@@ -1,14 +1,6 @@
 using System.CommandLine;
 using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
-using ZwiftTTTSim.Core.Exporters;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 
 // NOTE:
 // This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
