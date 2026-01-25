@@ -1,117 +1,264 @@
-﻿using System.CommandLine;
+using System.CommandLine;
 using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
 using ZwiftTTTSim.Core.Exporters;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using System.Data;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Reflection;
 
 // NOTE:
 // This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
 // Later 2.x versions are API-incompatible.
 
-// Define CLI options
-var inputFileOption = new Option<FileInfo>(
-    name: "--input",
-    description: "Path to the CSV file containing rider data")
-{
-    IsRequired = true
-};
-inputFileOption.AddAlias("-i");
+// Root command
+var rootCommand = new RootCommand("Zwift TTT Race Simulator - Generate team time trial workouts");
 
-var outputFolderOption = new Option<string>(
-    name: "--output",
-    description: "Output folder for workout files",
-    getDefaultValue: () => "workouts");
-outputFolderOption.AddAlias("-o");
+// Define CLI options
+
+var inputFileOption = new Option<FileInfo?>(
+    name: "--input",
+    description: "Path to the CSV file containing rider power plans and data",
+    parseArgument: result =>
+    {
+        var filePath = result.Tokens.Count > 0 ? result.Tokens[0].Value : null;
+        if (filePath == null)
+        {
+            result.ErrorMessage = "Input file path is required.";
+            return null;
+        }
+
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+        {
+            result.ErrorMessage = $"Input file '{fileInfo.FullName}' not found.";
+            return null;
+        }
+
+        return fileInfo;
+    })
+    {  IsRequired = true };
+inputFileOption.AddAlias("-i");
 
 var rotationsOption = new Option<int>(
     name: "--rotations",
-    description: "Number of rotations for the workout",
+    description: "Number of rotations to simulate (default: 5)",
     getDefaultValue: () => 5);
 rotationsOption.AddAlias("-r");
 
-var rootCommand = new RootCommand("Zwift TTT Race Simulator - Generate team time trial workouts")
-{
-    inputFileOption,
-    outputFolderOption,
-    rotationsOption
-};
+var outputFolderOption = new Option<DirectoryInfo?>(
+    name: "--output",
+    description: "Output folder for generated workout files (default: workouts)",
+    getDefaultValue: () => new DirectoryInfo("workouts"));
+outputFolderOption.AddAlias("-o");
 
-rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
+var formatsOption = new Option<string[]>(
+    name: "--format",
+    description: "Output file format: zwo, erg, image")
+{ AllowMultipleArgumentsPerToken = true };
+
+var dryRunOption = new Option<bool>(
+    name: "--dry-run",
+    description: "Perform a dry run without generating files (default: false)",
+    getDefaultValue: () => false);
+
+var verboseOption = new Option<bool>(
+    name: "--verbose",
+    description: "Enable verbose logging (default: false). Prints detailed pipeline information.",
+    getDefaultValue: () => false);
+
+var quietOption = new Option<bool>(
+    name: "--quiet",
+    description: "Enable quiet mode (default: false). Only print workflow steps without detailed information.",
+    getDefaultValue: () => false);
+
+var noLogoOption = new Option<bool>(
+    name: "--no-logo",
+    description: "Suppress the display of the program logo (default: false).",
+    getDefaultValue: () => false);
+
+//TODO: add validation for formatsOption to accept only known formats and make them required if --dry-run is not set
+//TODO: add validation so that if verbose is set, quiet cannot be set and viceversa
+
+rootCommand.AddOption(inputFileOption);
+rootCommand.AddOption(rotationsOption);
+rootCommand.AddOption(outputFolderOption);
+rootCommand.AddOption(formatsOption);
+rootCommand.AddOption(dryRunOption);
+rootCommand.AddOption(verboseOption);
+rootCommand.AddOption(quietOption);
+rootCommand.AddOption(noLogoOption);
+rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, verbose, quiet, noLogo) =>
 {
     try
     {
-        // Validate input file exists
-        if (!inputFile.Exists)
+        // Print header unless --no-logo is specified
+        if (!noLogo)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Error: Input file '{inputFile.FullName}' not found.");
-            Console.ResetColor();
-            Environment.Exit(1);
+            PrintHeader();
         }
 
+        // Print CLI parameters unless --quiet is specified
+        if(!quiet)
+        {
+            Console.WriteLine("======================================");
+            Console.WriteLine("CLI Parameters:");
+            Console.WriteLine($"    Input File: {inputFile?.FullName}");
+            Console.WriteLine($"    Rotations: {rotations}");
+            Console.WriteLine($"    Output Folder: {outputFolder?.FullName}");
+            Console.WriteLine($"    Formats ({formats.Length}): {string.Join(", ", formats ?? Array.Empty<string>())}");
+            Console.WriteLine($"    Dry Run: {dryRun}");
+            Console.WriteLine($"    Verbose: {verbose}");
+            Console.WriteLine($"    Quiet: {quiet}");
+            Console.WriteLine($"    No Logo: {noLogo}");
+            Console.WriteLine("======================================");
+            Console.WriteLine();
+        }
+        
         // Read and parse CSV file
-        var csvContent = File.ReadAllText(inputFile.FullName);
+        if(!quiet)
+        {
+            Console.WriteLine("Reading and parsing CSV file...");
+        }
+        var csvContent = File.ReadAllText(inputFile!.FullName);
         var parser = new CsvParser();
         var powerPlans = parser.ParseCsv(csvContent);
-
-        // Generate workouts
-        var pacelinePlanComposer = new PacelinePlanComposer();
-        var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
-
-
-        // Print workouts rider by rider
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine();
-        Console.WriteLine("╔══════════════════════════════════════╗");
-        Console.WriteLine("║  Zwift TTT Race Simulator            ║");
-        Console.WriteLine("╚══════════════════════════════════════╝");
-        Console.ResetColor();
-        Console.WriteLine($"Input File: {inputFile.Name}");
-        Console.WriteLine($"Team Size: {powerPlans.Count} riders");
-        Console.WriteLine($"Rotations: {rotations}");
-        Console.WriteLine($"Total Steps per Rider: {plan.Pulls.Count / powerPlans.Count}");
-        Console.WriteLine();
-
-
-        foreach (var pull in plan.Pulls)
+        if (verbose)
         {
-            Console.WriteLine($"Pull {pull.PullNumber}: Duration {pull.PullDuration.TotalSeconds} seconds");
-            foreach (var position in pull.PacelinePositions)
-            {
-                Console.WriteLine($"  Position {position.PositionInPull + 1}: Rider {position.Rider.Name}, Target Power {position.TargetPower} W");
-            }
+            Console.WriteLine($"Parsed {powerPlans.Count} rider power plans.");
+            Console.WriteLine();
+            //TODO: Print parsed power plans details
         }
 
+
+        // Generate paceline workout plan
+        if(!quiet)
+        {
+            Console.WriteLine("Composing paceline plan...");
+        }
+        var pacelinePlanComposer = new PacelinePlanComposer();
+        var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
+        if (verbose)
+        {
+            Console.WriteLine("Generated Paceline Plan:");
+            foreach (var pull in plan.Pulls)
+            {
+                Console.WriteLine($"Pull {pull.PullNumber}, Duration={pull.PullDuration.TotalSeconds}s"); //TODO: add all pull details
+                foreach (var position in pull.PacelinePositions)
+                {
+                    Console.WriteLine($"  Position {position.PositionInPull + 1}: Rider {position.Rider.Name}, Target Power {position.TargetPower} W");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        // Export workouts
+        if(!quiet)
+        {
+            Console.WriteLine("Projecting workouts...");
+        }
         var projector = new WorkoutProjector();
         var workouts = projector.Project(plan);
 
-        // Export workouts to ZWO files
-        var exporter = new ZwoExporter();
-        exporter.ExportToFiles(workouts, outputFolder);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"\n✅ Workouts exported to '{outputFolder}' directory");
-        Console.ResetColor();
-        Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
-        foreach (var riderName in workouts.Keys)
+        if(verbose)
         {
-            var fileName = ZwoExporter.GetWorkoutFileName(riderName);
-            Console.WriteLine($"   - {fileName}");
+            Console.WriteLine($"Projected workouts for {workouts.Count} riders.");
+            Console.WriteLine();
+            //TODO: Print projected workouts details
         }
 
-        // Export workout images
-        var imageExporter = new ImageExporter();
-        imageExporter.ExportToFiles(workouts, outputFolder, powerPlans.Count, powerPlans);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"\n✅ Workout images exported to '{outputFolder}' directory");
-        Console.ResetColor();
-        Console.WriteLine($"   Generated {workouts.Count} PNG files:");
-        foreach (var riderName in workouts.Keys)
+        if (dryRun)
         {
-            var fileName = ImageExporter.GetWorkoutImageFileName(riderName);
-            Console.WriteLine($"   - {fileName}");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n⚠️ Dry Run mode enabled - no files will be generated.");
+            Console.ResetColor();
+            return;
         }
-        Console.WriteLine();
+
+        if(formats == null || formats.Length == 0)
+        {
+            if(!quiet)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("No output formats specified. Terminating without exporting files.");
+                Console.ResetColor();
+            }
+        }
+        else
+        {
+            if(!quiet)
+            {
+                Console.WriteLine("Exporting workouts to files...");
+            }
+            foreach (var format in formats)
+            {
+                switch (format.ToLower())
+                {
+                    case "zwo":
+                        if(!quiet)
+                        {
+                            Console.WriteLine("Exporting ZWO files...");
+                        }
+                        var zwoExporter = new ZwoExporter();
+                        zwoExporter.ExportToFiles(workouts, outputFolder?.FullName);
+                        if(!quiet)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"✅ ZWO workouts exported to '{outputFolder?.FullName}' directory");
+                            Console.ResetColor();
+                        }
+                        if(verbose)
+                        {
+                            Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
+                            foreach (var riderName in workouts.Keys)
+                            {
+                                var fileName = ZwoExporter.GetWorkoutFileName(riderName);
+                                Console.WriteLine($"   - {fileName}");
+                            }
+                        }
+                        break;
+                    case "image":
+                        if(!quiet)
+                        {
+                            Console.WriteLine("Exporting workout images...");
+                        }
+                        var imageExporter = new ImageExporter();
+                        imageExporter.ExportToFiles(workouts, outputFolder?.FullName, powerPlans.Count, powerPlans);
+                        if(!quiet)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"✅ Workout images exported to '{outputFolder?.FullName}' directory");
+                            Console.ResetColor();
+                        }
+                        if(verbose)
+                        {
+                            Console.WriteLine($"   Generated {workouts.Count} PNG files:");
+                            foreach (var riderName in workouts.Keys)
+                            {
+                                var fileName = ImageExporter.GetWorkoutImageFileName(riderName);
+                                Console.WriteLine($"   - {fileName}");
+                            }
+                        }
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Error: Unknown format '{format}'. Supported formats are: zwo, image.");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+            if(!quiet)
+            {
+                Console.WriteLine();
+                Console.WriteLine("✅ All done!");
+            }
+        }
+
     }
     catch (Exception ex)
     {
@@ -120,7 +267,20 @@ rootCommand.SetHandler((inputFile, outputFolder, rotations) =>
         Console.ResetColor();
         Environment.Exit(1);
     }
-}, inputFileOption, outputFolderOption, rotationsOption);
+}, inputFileOption, rotationsOption, outputFolderOption, formatsOption, dryRunOption, verboseOption, quietOption, noLogoOption);
 
 return await rootCommand.InvokeAsync(args);
 
+void PrintHeader()
+{
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine();
+    Console.WriteLine("╔══════════════════════════════════════╗");
+    Console.WriteLine("║  Zwift TTT Race Simulator            ║");
+    Console.WriteLine("╚══════════════════════════════════════╝");
+    Console.WriteLine(" by Simone Chiaretta (c) 2026");
+    Console.WriteLine($" Version {Assembly.GetExecutingAssembly().GetName().Version}");
+    //TODO: Add more info?
+    Console.ResetColor();
+    Console.WriteLine();
+}

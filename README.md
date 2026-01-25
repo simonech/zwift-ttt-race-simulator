@@ -56,6 +56,43 @@ This project aims to close that gap by allowing teams to **simulate their race a
 This creates a realistic, repeatable simulation of a TTT paceline.
 
 
+## 🏗️ Architecture
+
+The simulator uses a layered architecture with clear separation of concerns:
+
+**CSV Input** → **CsvParser** → **PacelinePlanComposer** → **WorkoutProjector** → **ZwoExporter** / **ImageExporter**
+
+### Key Components
+
+- **Model Layer** (`ZwiftTTTSim.Core/Model/`): Domain models
+  - `PacelinePlan`: Complete race plan with all pulls and total duration
+  - `Pull`: One complete rotation cycle
+  - `PacelinePosition`: A rider's state within a pull
+  - `RiderPowerPlan`: Rider data with pull duration and position-based power values
+  - `WorkoutStep`: Duration + power pair for export
+
+- **Services Layer** (`ZwiftTTTSim.Core/Services/`): Business logic
+  - `PacelinePlanComposer`: Orchestrates rotation sequence and generates the complete race plan
+  - `WorkoutProjector`: Transforms race plans into rider-specific workout steps
+  - `CsvParser`: Parses rider input CSV files
+
+- **Exporters Layer** (`ZwiftTTTSim.Core/Exporters/`): Output generation
+  - `ZwoExporter`: Generates Zwift-compatible XML workout files
+  - `ImageExporter`: Creates PNG visualizations of power profiles
+  - `ConsoleBarVisualizer`: Renders ASCII power profiles in the console
+
+### Design Pattern: Hierarchical Rotation Model
+
+**One Pull = One Complete Rotation Cycle**
+
+Each `Pull` represents all riders in their current positions, with power values determined by position. When a rider finishes their pull, they rotate to the back and other riders move up one position. The pulling rider's pull duration defines the block duration for all riders.
+
+Key insights:
+- Position-based power is determined by `RiderPowerPlan.GetPowerByPosition()`
+- Power values beyond position 4 use the 4th position value (position clamping)
+- The `WorkoutProjector` transforms `PacelinePlan` objects into per-rider `WorkoutStep` lists
+
+
 ## 📥 Inputs
 
 The simulator expects rider data in CSV format with the following structure:
@@ -79,21 +116,35 @@ A sample CSV file (`sample-riders.csv`) is included in the repository.
 ### CLI Usage
 
 ```bash
-dotnet run --project ZwiftTTTSim.CLI -- --input <csv-file> [--output <folder>] [--rotations <count>]
+dotnet run --project ZwiftTTTSim.CLI -- --input <csv-file> [--output <folder>] [--rotations <count>] [--format <format>] [--verbose] [--quiet] [--dry-run] [--no-logo]
 ```
 
 **Options:**
 - `-i, --input <file>` (Required): Path to the CSV file containing rider data
 - `-o, --output <folder>`: Output folder for workout files (default: `workouts`)
 - `-r, --rotations <count>`: Number of rotations for the workout (default: `5`)
+- `--format <format>`: Output file format(s): `zwo`, `image` (can specify multiple)
+- `--verbose`: Enable verbose logging with detailed pipeline information
+- `--quiet`: Enable quiet mode - only print workflow steps without details
+- `--dry-run`: Perform a dry run without generating files
+- `--no-logo`: Suppress the program logo display
 
-**Example:**
+**Examples:**
 ```bash
-# Generate workouts with default settings (5 rotations, output to 'workouts' folder)
-dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv
+# Generate workouts with default settings (5 rotations, output to 'workouts' folder, export as ZWO)
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo
 
-# Generate workouts with custom settings
-dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10
+# Generate workouts with custom settings and visualizations
+dotnet run --project ZwiftTTTSim.CLI -- -i my-team.csv -o output/race1 -r 10 --format zwo image
+
+# Verbose output with detailed information
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo --verbose
+
+# Dry run without generating files
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --dry-run
+
+# Quiet mode with minimal output
+dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo image --quiet
 ```
 
 In practice, the input data can be:
