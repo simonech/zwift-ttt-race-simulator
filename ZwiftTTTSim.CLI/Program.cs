@@ -112,7 +112,7 @@ rootCommand.AddValidator(commandResult =>
 });
 
 
-// Add validator for mutually exclusive verbose/quiet and format requirement
+// Add validator for mutually exclusive verbose/quiet options
 rootCommand.AddValidator(commandResult =>
 {
     var verbose = commandResult.GetValueForOption(verboseOption);
