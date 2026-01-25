@@ -79,8 +79,6 @@ The simulator uses a layered architecture with clear separation of concerns:
 - **Exporters Layer** (`ZwiftTTTSim.Core/Exporters/`): Output generation
   - `ZwoExporter`: Generates Zwift-compatible XML workout files
   - `ImageExporter`: Creates PNG visualizations of power profiles
-  - `ConsoleBarVisualizer`: Renders ASCII power profiles in the console
-
 ### Design Pattern: Hierarchical Rotation Model
 
 **One Pull = One Complete Rotation Cycle**
