@@ -110,7 +110,7 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
             Console.WriteLine($"    Input File: {inputFile?.FullName}");
             Console.WriteLine($"    Rotations: {rotations}");
             Console.WriteLine($"    Output Folder: {outputFolder?.FullName}");
-            Console.WriteLine($"    Formats ({formats.Length}): {string.Join(", ", formats ?? Array.Empty<string>())}");
+            Console.WriteLine($"    Formats ({formats?.Length ?? 0}): {string.Join(", ", formats ?? Array.Empty<string>())}");
             Console.WriteLine($"    Dry Run: {dryRun}");
             Console.WriteLine($"    Verbose: {verbose}");
             Console.WriteLine($"    Quiet: {quiet}");
