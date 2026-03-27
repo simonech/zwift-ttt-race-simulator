@@ -186,6 +186,18 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
     }
 
     [Fact]
+    public void ParseCsv_ExtraFields_ShouldThrowException()
+    {
+        // Arrange
+        var csvContent = "Alice, 70, 300, 30, 350, 300, 280, 250, extra";
+        var parser = new CsvParser();
+
+        // Act & Assert
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
+        Assert.Contains("Expected exactly 8 fields", exception.Message);
+    }
+
+    [Fact]
     public void ParseCsv_WithBlankLineBeforeInvalidRow_ShouldReportPhysicalLineNumber()
     {
         // Arrange
