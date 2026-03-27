@@ -176,11 +176,13 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
         Console.ForegroundColor = ConsoleColor.Red;
         if (ex.LineNumber > 0)
         {
-            Console.Error.WriteLine($"Error: Invalid CSV at line {ex.LineNumber}:\n{ex.Message}");
+            Console.Error.WriteLine($"Error: Invalid CSV at line {ex.LineNumber}:");
+            Console.Error.WriteLine(ex.Message);
         }
         else
         {
-            Console.Error.WriteLine($"Error: Invalid CSV: {ex.Message}");
+            Console.Error.WriteLine($"Error: Invalid CSV:");
+            Console.Error.WriteLine(ex.Message);
         }
         if (verbose && !string.IsNullOrEmpty(ex.LineContent))
         {
@@ -222,7 +224,8 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
     catch (ModelValidationException ex)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.Error.WriteLine($"Error: Model validation failed:\n{ex.Message}");
+        Console.Error.WriteLine($"Error: Model validation failed:");
+        Console.Error.WriteLine(ex.Message);
 
         if (verbose)
         {

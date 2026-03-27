@@ -24,7 +24,7 @@ public class CsvParser
                 throw new CsvParseException(
                     lineNumber: lineNumber,
                     lineContent: line,
-                    message: "Expected exactly 8 fields:\n Name, Weight, FTP, Pull Duration, Pull Power, 2nd, 3rd, draft");
+                    message: "Expected exactly 8 fields: Name, Weight, FTP, Pull Duration, Pull Power, 2nd, 3rd, draft");
 
             var name = parts[0];
             
