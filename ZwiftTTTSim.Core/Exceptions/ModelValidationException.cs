@@ -25,9 +25,9 @@ public class ModelValidationException : Exception
         var errors = validationErrors?.ToArray() ?? [];
         if (errors.Length == 0)
         {
-            return "Model validation failed.";
+            return "Something went wrong.";
         }
 
-        return $"Model validation failed with {errors.Length} issue(s).";
+        return $"Found {errors.Length} issue(s).";
     }
 }
