@@ -186,6 +186,21 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
     }
 
     [Fact]
+    public void ParseCsv_WithBlankLineBeforeInvalidRow_ShouldReportPhysicalLineNumber()
+    {
+        // Arrange
+        var csvContent = "Alice, 70, 300, 30, 350, 300, 280, 250\n\nBob, 75, 280";
+        var parser = new CsvParser();
+
+        // Act
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
+
+        // Assert
+        Assert.Equal(3, exception.LineNumber);
+        Assert.Contains("Expected at least 8 fields", exception.Message);
+    }
+
+    [Fact]
     public void ParseCsv_WithExtraSpaces_ShouldTrimAndParseCorrectly()
     {
         // Arrange

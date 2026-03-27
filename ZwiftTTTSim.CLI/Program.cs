@@ -175,7 +175,14 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
         catch (CsvParseException ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine($"CSV Parse Error on line {ex.LineNumber}: {ex.Message}");
+            if (ex.LineNumber > 0) 
+            {
+                Console.Error.WriteLine($"CSV Parse Error on line {ex.LineNumber}: {ex.Message}");
+            }
+            else
+            {
+                Console.Error.WriteLine($"CSV Parse Error: {ex.Message}");
+            }
             if(verbose && !string.IsNullOrEmpty(ex.LineContent))
             {
                 Console.Error.WriteLine($"Line Content: {ex.LineContent}");
