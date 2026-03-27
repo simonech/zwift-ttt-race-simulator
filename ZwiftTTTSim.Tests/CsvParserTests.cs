@@ -122,7 +122,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
 
         // Act & Assert
         var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
-        Assert.Contains("Expected at least 8 fields", exception.Message);
+        Assert.Contains("Expected exactly 8 fields", exception.Message);
     }
 
     [Fact]
