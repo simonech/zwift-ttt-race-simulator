@@ -94,7 +94,7 @@ Key insights:
 
 ## 📥 Inputs
 
-The simulator expects rider data in CSV format with the following structure (each row requires at least 8 comma-separated fields):
+The simulator expects rider data in CSV format with the following structure (each row requires 8 comma-separated fields):
 
 ```csv
 # RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
