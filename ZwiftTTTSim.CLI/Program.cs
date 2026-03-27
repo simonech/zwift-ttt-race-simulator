@@ -38,7 +38,7 @@ var inputFileOption = new Option<FileInfo?>(
 
         return fileInfo;
     })
-    {  IsRequired = true };
+{ IsRequired = true };
 inputFileOption.AddAlias("-i");
 
 var rotationsOption = new Option<int>(
@@ -60,7 +60,7 @@ var formatsOption = new Option<string[]>(
     {
         var validFormats = new[] { "zwo", "image" };
         var formats = result.Tokens.Select(t => t.Value.ToLowerInvariant()).ToArray();
-        
+
         var invalidFormats = formats.Where(f => !validFormats.Contains(f)).Distinct().ToArray();
         if (invalidFormats.Any())
         {
@@ -94,8 +94,8 @@ var noLogoOption = new Option<bool>(
 
 rootCommand.AddValidator(commandResult =>
 {
-    var dryRun = commandResult.GetValueForOption(dryRunOption);  
-    
+    var dryRun = commandResult.GetValueForOption(dryRunOption);
+
     try
     {
         var formats = commandResult.GetValueForOption(formatsOption);
@@ -118,7 +118,7 @@ rootCommand.AddValidator(commandResult =>
 {
     var verbose = commandResult.GetValueForOption(verboseOption);
     var quiet = commandResult.GetValueForOption(quietOption);
-    
+
     if (verbose && quiet)
     {
         commandResult.ErrorMessage = "Options --verbose and --quiet cannot be used together.";
@@ -135,69 +135,70 @@ rootCommand.AddOption(quietOption);
 rootCommand.AddOption(noLogoOption);
 rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, verbose, quiet, noLogo) =>
 {
+
+    // Print header unless --no-logo is specified
+    if (!noLogo)
+    {
+        PrintHeader();
+    }
+
+    // Print CLI parameters unless --quiet is specified
+    if (!quiet)
+    {
+        Console.WriteLine("======================================");
+        Console.WriteLine("CLI Parameters:");
+        Console.WriteLine($"    Input File: {inputFile?.FullName}");
+        Console.WriteLine($"    Rotations: {rotations}");
+        Console.WriteLine($"    Output Folder: {outputFolder?.FullName}");
+        Console.WriteLine($"    Formats ({formats?.Length ?? 0}): {string.Join(", ", formats ?? Array.Empty<string>())}");
+        Console.WriteLine($"    Dry Run: {dryRun}");
+        Console.WriteLine($"    Verbose: {verbose}");
+        Console.WriteLine($"    Quiet: {quiet}");
+        Console.WriteLine($"    No Logo: {noLogo}");
+        Console.WriteLine("======================================");
+        Console.WriteLine();
+    }
+
+    // Read and parse CSV file
+    if (!quiet)
+    {
+        Console.WriteLine("Reading and parsing CSV file...");
+    }
+    var csvContent = File.ReadAllText(inputFile!.FullName);
+    var parser = new CsvParser();
+    var powerPlans = new List<RiderPowerPlan>();
     try
     {
-        // Print header unless --no-logo is specified
-        if (!noLogo)
+        powerPlans = parser.ParseCsv(csvContent);
+    }
+    catch (CsvParseException ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        if (ex.LineNumber > 0)
         {
-            PrintHeader();
+            Console.Error.WriteLine($"Error: Invalid CSV at line {ex.LineNumber}:");
+            Console.Error.WriteLine(ex.Message);
         }
+        else
+        {
+            Console.Error.WriteLine($"Error: Invalid CSV:");
+            Console.Error.WriteLine(ex.Message);
+        }
+        if (verbose && !string.IsNullOrEmpty(ex.LineContent))
+        {
+            Console.Error.WriteLine($"Line Content: {ex.LineContent}");
+        }
+        Console.ResetColor();
+        Environment.Exit(1);
+    }
 
-        // Print CLI parameters unless --quiet is specified
-        if(!quiet)
+    if (verbose)
+    {
+        Console.WriteLine($"Parsed {powerPlans.Count} rider power plans.");
+        Console.WriteLine();
+        var headers = new[] { "Name", "FTP (W)", "Duration (s)", "Pos 1 (W)", "Pos 2 (W)", "Pos 3 (W)", "Pos 4+ (W)" };
+        var rows = powerPlans.Select(p => new[]
         {
-            Console.WriteLine("======================================");
-            Console.WriteLine("CLI Parameters:");
-            Console.WriteLine($"    Input File: {inputFile?.FullName}");
-            Console.WriteLine($"    Rotations: {rotations}");
-            Console.WriteLine($"    Output Folder: {outputFolder?.FullName}");
-            Console.WriteLine($"    Formats ({formats?.Length ?? 0}): {string.Join(", ", formats ?? Array.Empty<string>())}");
-            Console.WriteLine($"    Dry Run: {dryRun}");
-            Console.WriteLine($"    Verbose: {verbose}");
-            Console.WriteLine($"    Quiet: {quiet}");
-            Console.WriteLine($"    No Logo: {noLogo}");
-            Console.WriteLine("======================================");
-            Console.WriteLine();
-        }
-        
-        // Read and parse CSV file
-        if(!quiet)
-        {
-            Console.WriteLine("Reading and parsing CSV file...");
-        }
-        var csvContent = File.ReadAllText(inputFile!.FullName);
-        var parser = new CsvParser();
-        var powerPlans = new List<RiderPowerPlan>();
-        try
-        {
-            powerPlans = parser.ParseCsv(csvContent);
-        }
-        catch (CsvParseException ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            if (ex.LineNumber > 0) 
-            {
-                Console.Error.WriteLine($"CSV Parse Error on line {ex.LineNumber}: {ex.Message}");
-            }
-            else
-            {
-                Console.Error.WriteLine($"CSV Parse Error: {ex.Message}");
-            }
-            if(verbose && !string.IsNullOrEmpty(ex.LineContent))
-            {
-                Console.Error.WriteLine($"Line Content: {ex.LineContent}");
-            }
-            Console.ResetColor();
-            Environment.Exit(1);
-        }
-        
-        if (verbose)
-        {
-            Console.WriteLine($"Parsed {powerPlans.Count} rider power plans.");
-            Console.WriteLine();
-            var headers = new[] { "Name", "FTP (W)", "Duration (s)", "Pos 1 (W)", "Pos 2 (W)", "Pos 3 (W)", "Pos 4+ (W)" };
-            var rows = powerPlans.Select(p => new[]
-            {
                 p.Name,
                 p.RiderData.FTP.ToString(),
                 p.PullDuration.TotalSeconds.ToString("0"),
@@ -206,175 +207,168 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
                 p.PowerByPosition.Length > 2 ? p.PowerByPosition[2].ToString() : "-",
                 p.PowerByPosition.Length > 3 ? p.PowerByPosition[3].ToString() : "-",
             });
-            AsciiTableRenderer.PrintTable(headers, rows);
-            Console.WriteLine();
-        }
+        AsciiTableRenderer.PrintTable(headers, rows);
+        Console.WriteLine();
+    }
 
-        // Validate input data
-        if(!quiet)
-        {
-            Console.WriteLine("Validating input data...");
-        }
-        try
-        {
-            var parsedModelValidator = new ParsedModelValidator();
-            parsedModelValidator.ValidateOrThrow(powerPlans);
-        }
-        catch (ModelValidationException ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(ex.Message);
+    // Validate input data
+    if (!quiet)
+    {
+        Console.WriteLine("Validating input data...");
+    }
+    try
+    {
+        var parsedModelValidator = new ParsedModelValidator();
+        parsedModelValidator.ValidateOrThrow(powerPlans);
+    }
+    catch (ModelValidationException ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Error.WriteLine($"Error: Model validation failed:");
+        Console.Error.WriteLine(ex.Message);
 
-            if (verbose)
-            {
-                Console.Error.WriteLine();
-                Console.Error.WriteLine("Validation issues:");
-                for (int i = 0; i < ex.ValidationErrors.Count; i++)
-                {
-                    Console.Error.WriteLine($"  {i + 1}. {ex.ValidationErrors[i]}");
-                }
-            }
-            else
-            {
-                Console.Error.WriteLine("Run with --verbose to see validation issue details.");
-            }
-            Console.ResetColor();
-            Environment.Exit(1);
-        }
-
-        // Generate paceline workout plan
-        if(!quiet)
-        {
-            Console.WriteLine("Composing paceline plan...");
-        }
-        var pacelinePlanComposer = new PacelinePlanComposer();
-        var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
         if (verbose)
         {
-            Console.WriteLine("Generated Paceline Plan with {0} pulls:", plan.Pulls.Count);
-            foreach (var pull in plan.Pulls)
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Validation issues:");
+            for (int i = 0; i < ex.ValidationErrors.Count; i++)
             {
-                var pullHeaders = new[] { "Position", "Rider", "Target Power (W)" };
-                var pullRows = pull.PacelinePositions.Select(p => new[]
-                {
-                    (p.PositionInPull + 1).ToString(),
-                    p.Rider.Name,
-                    p.TargetPower.ToString()
-                });
-                var pullTitle = $"Pull {pull.PullNumber}, Duration={pull.PullDuration.TotalSeconds}s";
-                AsciiTableRenderer.PrintTable(pullHeaders, pullRows, pullTitle);
-                Console.WriteLine();
-            }
-        }
-
-        // Export workouts
-        if(!quiet)
-        {
-            Console.WriteLine("Projecting workouts...");
-        }
-        var projector = new WorkoutProjector();
-        var workouts = projector.Project(plan);
-
-        if(verbose)
-        {
-            Console.WriteLine($"Projected workouts for {workouts.Count} riders.");
-            Console.WriteLine();
-            //TODO: Print projected workouts details
-        }
-
-        if (dryRun)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n⚠️ Dry Run mode enabled - no files will be generated.");
-            Console.ResetColor();
-            return;
-        }
-
-        if(formats == null || formats.Length == 0)
-        {
-            if(!quiet)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No output formats specified. Terminating without exporting files.");
-                Console.ResetColor();
+                Console.Error.WriteLine($"  {i + 1}. {ex.ValidationErrors[i]}");
             }
         }
         else
         {
-            if(!quiet)
-            {
-                Console.WriteLine("Exporting workouts to files...");
-            }
-            foreach (var format in formats)
-            {
-                switch (format)
-                {
-                    case "zwo":
-                        if(!quiet)
-                        {
-                            Console.WriteLine("Exporting ZWO files...");
-                        }
-                        var zwoExporter = new ZwoExporter();
-                        zwoExporter.ExportToFiles(workouts, outputFolder?.FullName);
-                        if(!quiet)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"✅ ZWO workouts exported to '{outputFolder?.FullName}' directory");
-                            Console.ResetColor();
-                        }
-                        if(verbose)
-                        {
-                            Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
-                            foreach (var riderName in workouts.Keys)
-                            {
-                                var fileName = ZwoExporter.GetWorkoutFileName(riderName);
-                                Console.WriteLine($"   - {fileName}");
-                            }
-                        }
-                        break;
-                    case "image":
-                        if(!quiet)
-                        {
-                            Console.WriteLine("Exporting workout images...");
-                        }
-                        var imageExporter = new ImageExporter();
-                        imageExporter.ExportToFiles(workouts, outputFolder?.FullName, powerPlans.Count, powerPlans);
-                        if(!quiet)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"✅ Workout images exported to '{outputFolder?.FullName}' directory");
-                            Console.ResetColor();
-                        }
-                        if(verbose)
-                        {
-                            Console.WriteLine($"   Generated {workouts.Count} PNG files:");
-                            foreach (var riderName in workouts.Keys)
-                            {
-                                var fileName = ImageExporter.GetWorkoutImageFileName(riderName);
-                                Console.WriteLine($"   - {fileName}");
-                            }
-                        }
-                        break;
-                    default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Error: Unknown format '{format}'. Supported formats are: zwo, image.");
-                        Console.ResetColor();
-                        break;
-                }
-            }
-            if(!quiet)
-            {
-                Console.WriteLine();
-                Console.WriteLine("✅ All done!");
-            }
+            Console.Error.WriteLine("Run with --verbose to see validation issue details.");
         }
-    }
-    catch (Exception ex)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"Error: {ex.Message}");
         Console.ResetColor();
         Environment.Exit(1);
+    }
+
+    // Generate paceline workout plan
+    if (!quiet)
+    {
+        Console.WriteLine("Composing paceline plan...");
+    }
+    var pacelinePlanComposer = new PacelinePlanComposer();
+    var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
+    if (verbose)
+    {
+        Console.WriteLine("Generated Paceline Plan with {0} pulls:", plan.Pulls.Count);
+        foreach (var pull in plan.Pulls)
+        {
+            var pullHeaders = new[] { "Position", "Rider", "Target Power (W)" };
+            var pullRows = pull.PacelinePositions.Select(p => new[]
+            {
+                    (p.PositionInPull + 1).ToString(),
+                    p.Rider.Name,
+                    p.TargetPower.ToString()
+                });
+            var pullTitle = $"Pull {pull.PullNumber}, Duration={pull.PullDuration.TotalSeconds}s";
+            AsciiTableRenderer.PrintTable(pullHeaders, pullRows, pullTitle);
+            Console.WriteLine();
+        }
+    }
+
+    // Export workouts
+    if (!quiet)
+    {
+        Console.WriteLine("Projecting workouts...");
+    }
+    var projector = new WorkoutProjector();
+    var workouts = projector.Project(plan);
+
+    if (verbose)
+    {
+        Console.WriteLine($"Projected workouts for {workouts.Count} riders.");
+        Console.WriteLine();
+        //TODO: Print projected workouts details
+    }
+
+    if (dryRun)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("\n⚠️ Dry Run mode enabled - no files will be generated.");
+        Console.ResetColor();
+        return;
+    }
+
+    if (formats == null || formats.Length == 0)
+    {
+        if (!quiet)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No output formats specified. Terminating without exporting files.");
+            Console.ResetColor();
+        }
+    }
+    else
+    {
+        if (!quiet)
+        {
+            Console.WriteLine("Exporting workouts to files...");
+        }
+        foreach (var format in formats)
+        {
+            switch (format)
+            {
+                case "zwo":
+                    if (!quiet)
+                    {
+                        Console.WriteLine("Exporting ZWO files...");
+                    }
+                    var zwoExporter = new ZwoExporter();
+                    zwoExporter.ExportToFiles(workouts, outputFolder?.FullName);
+                    if (!quiet)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"✅ ZWO workouts exported to '{outputFolder?.FullName}' directory");
+                        Console.ResetColor();
+                    }
+                    if (verbose)
+                    {
+                        Console.WriteLine($"   Generated {workouts.Count} ZWO files:");
+                        foreach (var riderName in workouts.Keys)
+                        {
+                            var fileName = ZwoExporter.GetWorkoutFileName(riderName);
+                            Console.WriteLine($"   - {fileName}");
+                        }
+                    }
+                    break;
+                case "image":
+                    if (!quiet)
+                    {
+                        Console.WriteLine("Exporting workout images...");
+                    }
+                    var imageExporter = new ImageExporter();
+                    imageExporter.ExportToFiles(workouts, outputFolder?.FullName, powerPlans.Count, powerPlans);
+                    if (!quiet)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"✅ Workout images exported to '{outputFolder?.FullName}' directory");
+                        Console.ResetColor();
+                    }
+                    if (verbose)
+                    {
+                        Console.WriteLine($"   Generated {workouts.Count} PNG files:");
+                        foreach (var riderName in workouts.Keys)
+                        {
+                            var fileName = ImageExporter.GetWorkoutImageFileName(riderName);
+                            Console.WriteLine($"   - {fileName}");
+                        }
+                    }
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Error.WriteLine($"Error: Unknown format '{format}'. Supported formats are: zwo, image.");
+                    Console.ResetColor();
+                    break;
+            }
+        }
+        if (!quiet)
+        {
+            Console.WriteLine();
+            Console.WriteLine("✅ All done!");
+        }
     }
 }, inputFileOption, rotationsOption, outputFolderOption, formatsOption, dryRunOption, verboseOption, quietOption, noLogoOption);
 

@@ -95,7 +95,7 @@
 
         <section id="inputs">
             <h2>📥 Inputs</h2>
-            <p>The simulator expects rider data in CSV format with the following structure (each row requires at least 8 comma-separated fields):</p>
+            <p>The simulator expects rider data in CSV format with the following structure (each row must contain exactly 8 comma-separated fields; rows with fewer or more fields will be rejected with a parsing error):</p>
             <pre><code># RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
 Alice, 70, 300, 30, 350, 300, 280, 250
 Bob, 75, 280, 45, 330, 290, 270, 240

@@ -20,8 +20,11 @@ public class CsvParser
                 continue;
 
             var parts = line.Split(',', StringSplitOptions.TrimEntries);
-            if (parts.Length < 8)
-                throw new CsvParseException(lineNumber: lineNumber, lineContent: line, message: "Expected exactly 8 fields");
+            if (parts.Length != 8)
+                throw new CsvParseException(
+                    lineNumber: lineNumber,
+                    lineContent: line,
+                    message: "Expected exactly 8 fields: Name, Weight, FTP, Pull Duration, Pull Power, 2nd, 3rd, draft");
 
             var name = parts[0];
             
