@@ -1,10 +1,12 @@
 using System.CommandLine;
+using ZwiftTTTSim.CLI;
 using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
 using ZwiftTTTSim.Core.Exporters;
 using System.Reflection;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using ZwiftTTTSim.Core.Exceptions;
 
 // NOTE:
 // This CLI uses System.CommandLine 2.0.0-beta4.22272.1.
@@ -92,8 +94,7 @@ var noLogoOption = new Option<bool>(
 
 rootCommand.AddValidator(commandResult =>
 {
-    var dryRun = commandResult.GetValueForOption(dryRunOption);
-    
+    var dryRun = commandResult.GetValueForOption(dryRunOption);  
     
     try
     {
@@ -166,14 +167,80 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
         }
         var csvContent = File.ReadAllText(inputFile!.FullName);
         var parser = new CsvParser();
-        var powerPlans = parser.ParseCsv(csvContent);
+        var powerPlans = new List<RiderPowerPlan>();
+        try
+        {
+            powerPlans = parser.ParseCsv(csvContent);
+        }
+        catch (CsvParseException ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (ex.LineNumber > 0) 
+            {
+                Console.Error.WriteLine($"CSV Parse Error on line {ex.LineNumber}: {ex.Message}");
+            }
+            else
+            {
+                Console.Error.WriteLine($"CSV Parse Error: {ex.Message}");
+            }
+            if(verbose && !string.IsNullOrEmpty(ex.LineContent))
+            {
+                Console.Error.WriteLine($"Line Content: {ex.LineContent}");
+            }
+            Console.ResetColor();
+            Environment.Exit(1);
+        }
+        
         if (verbose)
         {
             Console.WriteLine($"Parsed {powerPlans.Count} rider power plans.");
             Console.WriteLine();
-            //TODO: Print parsed power plans details
+            var headers = new[] { "Name", "FTP (W)", "Duration (s)", "Pos 1 (W)", "Pos 2 (W)", "Pos 3 (W)", "Pos 4+ (W)" };
+            var rows = powerPlans.Select(p => new[]
+            {
+                p.Name,
+                p.RiderData.FTP.ToString(),
+                p.PullDuration.TotalSeconds.ToString("0"),
+                p.PowerByPosition.Length > 0 ? p.PowerByPosition[0].ToString() : "-",
+                p.PowerByPosition.Length > 1 ? p.PowerByPosition[1].ToString() : "-",
+                p.PowerByPosition.Length > 2 ? p.PowerByPosition[2].ToString() : "-",
+                p.PowerByPosition.Length > 3 ? p.PowerByPosition[3].ToString() : "-",
+            });
+            AsciiTableRenderer.PrintTable(headers, rows);
+            Console.WriteLine();
         }
 
+        // Validate input data
+        if(!quiet)
+        {
+            Console.WriteLine("Validating input data...");
+        }
+        try
+        {
+            var parsedModelValidator = new ParsedModelValidator();
+            parsedModelValidator.ValidateOrThrow(powerPlans);
+        }
+        catch (ModelValidationException ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine(ex.Message);
+
+            if (verbose)
+            {
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("Validation issues:");
+                for (int i = 0; i < ex.ValidationErrors.Count; i++)
+                {
+                    Console.Error.WriteLine($"  {i + 1}. {ex.ValidationErrors[i]}");
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("Run with --verbose to see validation issue details.");
+            }
+            Console.ResetColor();
+            Environment.Exit(1);
+        }
 
         // Generate paceline workout plan
         if(!quiet)
@@ -184,17 +251,20 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
         var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
         if (verbose)
         {
-            Console.WriteLine("Generated Paceline Plan:");
+            Console.WriteLine("Generated Paceline Plan with {0} pulls:", plan.Pulls.Count);
             foreach (var pull in plan.Pulls)
             {
-                Console.WriteLine($"Pull {pull.PullNumber}, Duration={pull.PullDuration.TotalSeconds}s"); //TODO: add all pull details
-                foreach (var position in pull.PacelinePositions)
+                var pullHeaders = new[] { "Position", "Rider", "Target Power (W)" };
+                var pullRows = pull.PacelinePositions.Select(p => new[]
                 {
-                    Console.WriteLine($"  Position {position.PositionInPull + 1}: Rider {position.Rider.Name}, Target Power {position.TargetPower} W");
-                }
+                    (p.PositionInPull + 1).ToString(),
+                    p.Rider.Name,
+                    p.TargetPower.ToString()
+                });
+                var pullTitle = $"Pull {pull.PullNumber}, Duration={pull.PullDuration.TotalSeconds}s";
+                AsciiTableRenderer.PrintTable(pullHeaders, pullRows, pullTitle);
+                Console.WriteLine();
             }
-
-            Console.WriteLine();
         }
 
         // Export workouts
@@ -298,7 +368,6 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
                 Console.WriteLine("✅ All done!");
             }
         }
-
     }
     catch (Exception ex)
     {

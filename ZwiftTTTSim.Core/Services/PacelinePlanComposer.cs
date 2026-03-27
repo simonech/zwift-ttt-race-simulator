@@ -12,15 +12,7 @@ public class PacelinePlanComposer
     /// <returns>PacelinePlan object representing the entire race plan.</returns>
     public PacelinePlan CreatePlan(List<RiderPowerPlan> powerPlans, int rotations)
     {
-
-        //TODO: Validate input
-        // - powerPlans not empty
-        // - rotations > 0
-        // - each RiderPowerPlan has valid PowerByPosition data
-        // - each RiderPowerPlan has valid Rider data (FTP > 0)
-        // - each RiderPowerPlan has PullDuration > 0
-        // - names are unique
-        // Throw exceptions if any validation fails
+        // Model validation is performed by ParsedModelValidator before composing the plan.
         
         var plan = new PacelinePlan();
 
