@@ -1,4 +1,5 @@
 using Xunit;
+using ZwiftTTTSim.Core.Exceptions;
 using ZwiftTTTSim.Core.Services;
 
 namespace ZwiftTTTSim.Tests;
@@ -95,7 +96,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("No valid rider data found", exception.Message);
     }
 
@@ -108,7 +109,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("No valid rider data found", exception.Message);
     }
 
@@ -120,8 +121,8 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
-        Assert.Contains("expected at least 7 fields", exception.Message);
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
+        Assert.Contains("Expected at least 8 fields", exception.Message);
     }
 
     [Fact]
@@ -132,7 +133,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("Invalid weight value", exception.Message);
     }
 
@@ -144,7 +145,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("Invalid FTP value", exception.Message);
     }
 
@@ -156,7 +157,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("Invalid PullDuration value", exception.Message);
     }
 
@@ -168,7 +169,7 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
         Assert.Contains("Invalid PowerByPosition[0] value", exception.Message);
     }
 
@@ -180,8 +181,8 @@ Bob, 75, 280, 45, 330, 290, 270, 240";
         var parser = new CsvParser();
 
         // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => parser.ParseCsv(csvContent));
-        Assert.Contains("expected at least 7 fields", exception.Message);
+        var exception = Assert.Throws<CsvParseException>(() => parser.ParseCsv(csvContent));
+        Assert.Contains("Expected at least 8 fields", exception.Message);
     }
 
     [Fact]

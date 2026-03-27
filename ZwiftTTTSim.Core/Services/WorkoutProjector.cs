@@ -15,10 +15,10 @@ public class WorkoutProjector
     /// </summary>
     /// <param name="plan">The paceline plan containing pulls and rider positions to project into workouts.</param>
     /// <returns>
-/// A dictionary keyed by rider name, where each value is the list of
-/// <see cref="WorkoutStep"/> objects representing that rider's workout.
-/// </returns>
-/// <exception cref="ArgumentNullException"><paramref name="plan"/> is <c>null</c>.</exception>
+    /// A dictionary keyed by rider name, where each value is the list of
+    /// <see cref="WorkoutStep"/> objects representing that rider's workout.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="plan"/> is <c>null</c>.</exception>
     public Dictionary<string, List<WorkoutStep>> Project(PacelinePlan plan)
     {
 
