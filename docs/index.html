@@ -95,7 +95,7 @@
 
         <section id="inputs">
             <h2>📥 Inputs</h2>
-            <p>The simulator expects rider data in CSV format with the following structure:</p>
+            <p>The simulator expects rider data in CSV format with the following structure (each row requires at least 8 comma-separated fields):</p>
             <pre><code># RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
 Alice, 70, 300, 30, 350, 300, 280, 250
 Bob, 75, 280, 45, 330, 290, 270, 240
@@ -208,6 +208,7 @@ dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo image 
                     <ul>
                         <li><code>PacelinePlanComposer</code>: Orchestrates rotation sequence and generates the complete race plan</li>
                         <li><code>WorkoutProjector</code>: Transforms race plans into rider-specific workout steps</li>
+                        <li><code>ParsedModelValidator</code>: Validates parsed rider models before plan composition</li>
                         <li><code>CsvParser</code>: Parses rider input CSV files</li>
                     </ul>
                 </li>
@@ -224,7 +225,7 @@ dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv --format zwo image 
             <ul>
                 <li>Each <code>Pull</code> represents all riders in their current positions</li>
                 <li>Position-based power is determined by <code>RiderPowerPlan.GetPowerByPosition()</code></li>
-                <li>Power values beyond position 4 use the 4th position value (position clamping)</li>
+                <li>Positions 4 and above reuse the last defined power value (index 3); this allows any team size to use the same 4-position power definition (position clamping)</li>
                 <li>The pulling rider's pull duration determines the block duration for all riders</li>
             </ul>
         </section>

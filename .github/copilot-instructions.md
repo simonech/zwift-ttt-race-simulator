@@ -24,7 +24,8 @@ This project generates **one workout file per rider** simulating a Team Time Tri
 - **Services layer** (`ZwiftTTTSim.Core/Services/`): Business logic
   - `PacelinePlanComposer`: **Core simulation logic** - orchestrates the rotation sequence by generating a `PacelinePlan` with all `Pull` objects, each representing one complete rotation cycle
   - `WorkoutProjector`: Transforms a `PacelinePlan` into rider-specific `WorkoutStep` collections for export
-  - `CsvParser`: Parses rider input (7 fields: name, weight, FTP, pull duration, then 4 power values for positions 1-4+)
+  - `ParsedModelValidator`: Validates parsed rider models (duplicate names, positive FTP/weight, non-zero power) before plan composition via `ValidateOrThrow()`
+  - `CsvParser`: Parses rider input (8 fields: name, weight, FTP, pull duration, then 4 power values for positions 1–4+)
 
 - **Exporters layer** (`ZwiftTTTSim.Core/Exporters/`): Output generation
   - `ZwoExporter`: Generates Zwift-compatible XML workout files from `WorkoutStep` collections
@@ -36,7 +37,7 @@ This project generates **one workout file per rider** simulating a Team Time Tri
 
 - **One Pull = One Complete Rotation Cycle**: A pull groups all riders simultaneously, reflecting the physical reality of team time trials
 - **Position-Based Power**: Each rider's power in a pull is determined by their current position via `RiderPowerPlan.GetPowerByPosition(position)` — not by rider identity
-- **Position Clamping**: Lookups beyond position 4 return the last defined power value (see `RiderPowerPlanTests.cs`)
+- **Position Clamping**: Positions 4 and above reuse the last defined power value (index 3); this allows any team size to use the same 4-position power definition (see `RiderPowerPlanTests.cs`)
 - **WorkoutProjector**: Transforms `PacelinePlan.Pulls` into per-rider `WorkoutStep` lists via position-to-step mapping
 
 ## Coding Standards
@@ -57,7 +58,7 @@ This project generates **one workout file per rider** simulating a Team Time Tri
   - Duration tracking per pull
   - Position clamping edge cases (position 4+)
   - Multi-rotation cycle repeatability
-- **WorkoutProjectorTests**: Tests for workout step projection from paceline plans
+- **WorkoutProjectorTests**: Tests for workout step projection from paceline plans (planned; not yet implemented)
 - Tests must be independent and runnable in any order
 - Theory tests should cover meaningful team size/rotation combinations (e.g., 4/6/8 riders × 1-3 rotations)
 
@@ -67,9 +68,9 @@ This project generates **one workout file per rider** simulating a Team Time Tri
 
 ### Error Handling
 
-- Use meaningful exception messages for invalid inputs (e.g., CsvParser validates 7+ CSV fields per line)
+- Use meaningful exception messages for invalid inputs (e.g., CsvParser requires at least 8 comma-separated fields per line: name, weight, FTP, pull duration, and 4 power values for positions 1–4+)
 - Throw custom exceptions when appropriate; avoid generic Exception
-- Validate inputs early in business logic (see TODO comments in `PacelinePlanComposer`)
+- Validate inputs early via `ParsedModelValidator.ValidateOrThrow()` before plan composition; throw `ModelValidationException` with a list of errors on failure
 
 ## Development Workflows
 

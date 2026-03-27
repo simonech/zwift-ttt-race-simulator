@@ -74,6 +74,7 @@ The simulator uses a layered architecture with clear separation of concerns:
 - **Services Layer** (`ZwiftTTTSim.Core/Services/`): Business logic
   - `PacelinePlanComposer`: Orchestrates rotation sequence and generates the complete race plan
   - `WorkoutProjector`: Transforms race plans into rider-specific workout steps
+  - `ParsedModelValidator`: Validates parsed rider models before plan composition
   - `CsvParser`: Parses rider input CSV files
 
 - **Exporters Layer** (`ZwiftTTTSim.Core/Exporters/`): Output generation
@@ -87,13 +88,13 @@ Each `Pull` represents all riders in their current positions, with power values 
 
 Key insights:
 - Position-based power is determined by `RiderPowerPlan.GetPowerByPosition()`
-- Power values beyond position 4 use the 4th position value (position clamping)
+- Positions 4 and above reuse the last defined power value (index 3); this allows any team size to use the same 4-position power definition (position clamping)
 - The `WorkoutProjector` transforms `PacelinePlan` objects into per-rider `WorkoutStep` lists
 
 
 ## 📥 Inputs
 
-The simulator expects rider data in CSV format with the following structure:
+The simulator expects rider data in CSV format with the following structure (each row requires at least 8 comma-separated fields):
 
 ```csv
 # RiderName, Weight, FTP, Pull Duration, Pull Power, 2nd place power, 3rd place power, Draft (4th and more)
