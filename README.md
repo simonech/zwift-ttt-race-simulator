@@ -104,6 +104,7 @@ dotnet build
 dotnet test
 dotnet run --project ZwiftTTTSim.CLI -- -i sample-riders.csv
 ```
+
 ---
 
 ## 🚧 Project Status
@@ -113,6 +114,7 @@ This project is currently a personal side project and the architecture is still 
 For now, large feature pull requests (especially roadmap implementations) are not being accepted.
 
 Feel free to open issues or discussions if you’d like to contribute or suggest ideas.
+
 ---
 
 ## ⚠️ Notes
