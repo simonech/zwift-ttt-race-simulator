@@ -1,5 +1,6 @@
 using Xunit;
 using ZwiftTTTSim.Core.Model;
+using ZwiftTTTSim.Core.Model.Segments;
 using ZwiftTTTSim.Core.Services;
 
 namespace ZwiftTTTSim.Tests;
@@ -385,5 +386,76 @@ public class PacelinePlanComposerTests
         Assert.Equal(380, plan.Pulls[3].PacelinePositions[0].TargetPower); // pos 0 (repeats)
         Assert.Equal(260, plan.Pulls[4].PacelinePositions[2].TargetPower); // pos 2
         Assert.Equal(320, plan.Pulls[5].PacelinePositions[1].TargetPower); // pos 1
+    }
+
+    [Fact]
+    public void CreatePlan_WithSegments_RoundsRotationsCorrectly()
+    {
+        // Arrange
+        var powerPlans = TestData.GetSampleRiderPowerPlans(); // 4 riders: 225s per rotation
+        // 1.5 rotations = 337.5 seconds
+        // Distance = (337.5 / 3600) * 40kph = 3.75 km
+        var flatSegment = new FlatSegment { DistanceKm = 3.75, AvgSpeedKph = 40 };
+        
+        var composer = new PacelinePlanComposer();
+        var route = new List<ISegment> { flatSegment };
+
+        // Act
+        var plan = composer.CreatePlan(powerPlans, route);
+
+        // Assert
+        // 1.5 rotations rounds away from zero to 2 rotations -> 8 pulls
+        Assert.Equal(8, plan.Pulls.Count);
+    }
+
+    [Fact]
+    public void CreatePlan_WithSegments_EnsuresMinimumOneRotation()
+    {
+        // Arrange
+        var powerPlans = TestData.GetSampleRiderPowerPlans(); // 4 riders: 225s per rotation
+        // Tiny segment -> 10 seconds -> 0.044 rotations
+        var flatSegment = new FlatSegment { DistanceKm = 0.1, AvgSpeedKph = 36 };
+        
+        var composer = new PacelinePlanComposer();
+        var route = new List<ISegment> { flatSegment };
+
+        // Act
+        var plan = composer.CreatePlan(powerPlans, route);
+
+        // Assert
+        // Minimum 1 rotation -> 4 pulls
+        Assert.Equal(4, plan.Pulls.Count);
+    }
+
+    [Fact]
+    public void CreatePlan_WithSegments_HandlesMixedPlan()
+    {
+        // Arrange
+        var powerPlans = TestData.GetSampleRiderPowerPlans(); // 4 riders: 225s per rotation
+        var route = new List<ISegment>
+        {
+            new FlatSegment { DistanceKm = 2.5, AvgSpeedKph = 40 }, // 1 rotation (4 pulls)
+            new ClimbSegment { DurationSeconds = 300 }, // 1 fixed effort pull
+            new FlatSegment { DistanceKm = 2.5, AvgSpeedKph = 40 }  // 1 rotation (4 pulls)
+        };
+        
+        var composer = new PacelinePlanComposer();
+
+        // Act
+        var plan = composer.CreatePlan(powerPlans, route);
+
+        // Assert
+        // 4 pulls + 1 pull + 4 pulls = 9 pulls
+        Assert.Equal(9, plan.Pulls.Count);
+
+        // Check climb pull (index 4)
+        var climbPull = plan.Pulls[4];
+        Assert.Equal(300, climbPull.PullDuration.TotalSeconds);
+        
+        // Ensure default W/kg power is applied (4.0 W/kg)
+        foreach (var pos in climbPull.PacelinePositions)
+        {
+            Assert.Equal(pos.Rider.RiderData.Weight * 4.0, pos.TargetPower);
+        }
     }
 }

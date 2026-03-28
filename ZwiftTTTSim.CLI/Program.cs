@@ -3,6 +3,7 @@ using ZwiftTTTSim.CLI;
 using ZwiftTTTSim.Core.Model;
 using ZwiftTTTSim.Core.Services;
 using ZwiftTTTSim.Core.Exporters;
+using ZwiftTTTSim.Core.Model.Config;
 using System.Reflection;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
@@ -91,6 +92,23 @@ var noLogoOption = new Option<bool>(
     description: "Suppress the display of the program logo (default: false).",
     getDefaultValue: () => false);
 
+var raceFileOption = new Option<FileInfo?>(
+    name: "--race",
+    description: "Path to a JSON file containing the sequence of race segments (overrides --rotations)",
+    parseArgument: result =>
+    {
+        var filePath = result.Tokens.Count > 0 ? result.Tokens[0].Value : null;
+        if (filePath == null) return null;
+
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+        {
+            result.ErrorMessage = $"Race file '{fileInfo.FullName}' not found.";
+            return null;
+        }
+
+        return fileInfo;
+    });
 
 rootCommand.AddValidator(commandResult =>
 {
@@ -133,8 +151,31 @@ rootCommand.AddOption(dryRunOption);
 rootCommand.AddOption(verboseOption);
 rootCommand.AddOption(quietOption);
 rootCommand.AddOption(noLogoOption);
-rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, verbose, quiet, noLogo) =>
+rootCommand.AddOption(raceFileOption);
+
+rootCommand.SetHandler((System.CommandLine.Invocation.InvocationContext context) =>
 {
+    var inputFile = context.ParseResult.GetValueForOption(inputFileOption);
+    var rotations = context.ParseResult.GetValueForOption(rotationsOption);
+    var outputFolder = context.ParseResult.GetValueForOption(outputFolderOption);
+    var formats = context.ParseResult.GetValueForOption(formatsOption);
+    var dryRun = context.ParseResult.GetValueForOption(dryRunOption);
+    var verbose = context.ParseResult.GetValueForOption(verboseOption);
+    var quiet = context.ParseResult.GetValueForOption(quietOption);
+    var noLogo = context.ParseResult.GetValueForOption(noLogoOption);
+    var raceFile = context.ParseResult.GetValueForOption(raceFileOption);
+
+    // Mutual Exclusivity Check (#56)
+    if (raceFile != null && context.ParseResult.FindResultFor(rotationsOption) != null)
+    {
+        if (!quiet)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Warning: Both --race and --rotations were provided. The --rotations value will be ignored in favor of the race configuration.");
+            Console.ResetColor();
+            Console.WriteLine();
+        }
+    }
 
     // Print header unless --no-logo is specified
     if (!noLogo)
@@ -148,7 +189,14 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
         Console.WriteLine("======================================");
         Console.WriteLine("CLI Parameters:");
         Console.WriteLine($"    Input File: {inputFile?.FullName}");
-        Console.WriteLine($"    Rotations: {rotations}");
+        if (raceFile != null)
+        {
+            Console.WriteLine($"    Race File: {raceFile.FullName} (overrides rotations)");
+        }
+        else
+        {
+            Console.WriteLine($"    Rotations: {rotations}");
+        }
         Console.WriteLine($"    Output Folder: {outputFolder?.FullName}");
         Console.WriteLine($"    Formats ({formats?.Length ?? 0}): {string.Join(", ", formats ?? Array.Empty<string>())}");
         Console.WriteLine($"    Dry Run: {dryRun}");
@@ -245,12 +293,58 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
     }
 
     // Generate paceline workout plan
-    if (!quiet)
-    {
-        Console.WriteLine("Composing paceline plan...");
-    }
     var pacelinePlanComposer = new PacelinePlanComposer();
-    var plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
+    PacelinePlan plan;
+    string? effectiveOutputFolder = outputFolder?.FullName;
+
+    if (raceFile != null)
+    {
+        if (!quiet)
+        {
+            Console.WriteLine("Reading and parsing Race JSON file...");
+        }
+        var raceContent = File.ReadAllText(raceFile.FullName);
+        var raceParser = new RaceConfigParser();
+        try
+        {
+            var raceConfig = raceParser.Parse(raceContent);
+            
+            // Use race name for output folder organization if available
+            if (!string.IsNullOrWhiteSpace(raceConfig.Name))
+            {
+                var sanitizedName = string.Join("_", raceConfig.Name.Split(Path.GetInvalidFileNameChars()));
+                effectiveOutputFolder = Path.Combine(effectiveOutputFolder ?? "workouts", sanitizedName);
+            }
+
+            if (verbose)
+            {
+                Console.WriteLine($"Parsed Race Config: {raceConfig.Name} with {raceConfig.Route.Count} segments.");
+            }
+            if (!quiet)
+            {
+                Console.WriteLine("Composing paceline plan using race segments...");
+            }
+            plan = pacelinePlanComposer.CreatePlan(powerPlans, raceConfig.Route);
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine("Error: Failed to process race configuration:");
+            Console.Error.WriteLine(ex.Message);
+            Console.ResetColor();
+            Environment.Exit(1);
+            return;
+        }
+    }
+    else
+    {
+        if (!quiet)
+        {
+            Console.WriteLine("Composing paceline plan using fixed rotations...");
+        }
+        plan = pacelinePlanComposer.CreatePlan(powerPlans, rotations);
+    }
+
     if (verbose)
     {
         Console.WriteLine("Generated Paceline Plan with {0} pulls:", plan.Pulls.Count);
@@ -317,11 +411,11 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
                         Console.WriteLine("Exporting ZWO files...");
                     }
                     var zwoExporter = new ZwoExporter();
-                    zwoExporter.ExportToFiles(workouts, outputFolder?.FullName);
+                    zwoExporter.ExportToFiles(workouts, effectiveOutputFolder);
                     if (!quiet)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"✅ ZWO workouts exported to '{outputFolder?.FullName}' directory");
+                        Console.WriteLine($"✅ ZWO workouts exported to '{effectiveOutputFolder}' directory");
                         Console.ResetColor();
                     }
                     if (verbose)
@@ -340,11 +434,11 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
                         Console.WriteLine("Exporting workout images...");
                     }
                     var imageExporter = new ImageExporter();
-                    imageExporter.ExportToFiles(workouts, outputFolder?.FullName, powerPlans.Count, powerPlans);
+                    imageExporter.ExportToFiles(workouts, effectiveOutputFolder, powerPlans.Count, powerPlans);
                     if (!quiet)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"✅ Workout images exported to '{outputFolder?.FullName}' directory");
+                        Console.WriteLine($"✅ Workout images exported to '{effectiveOutputFolder}' directory");
                         Console.ResetColor();
                     }
                     if (verbose)
@@ -370,7 +464,7 @@ rootCommand.SetHandler((inputFile, rotations, outputFolder, formats, dryRun, ver
             Console.WriteLine("✅ All done!");
         }
     }
-}, inputFileOption, rotationsOption, outputFolderOption, formatsOption, dryRunOption, verboseOption, quietOption, noLogoOption);
+});
 
 return await new CommandLineBuilder(rootCommand)
     .UseDefaults()  // Adds standard middleware
