@@ -1,4 +1,4 @@
-![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](docs/images/banner.png)
+![Zwift TTT Race Simulator - Precision training for WTRL Time Trials](docs/assets/images/banner.png)
 
 # 🚴 Zwift TTT Race Simulator
 
@@ -95,7 +95,7 @@ Each rider receives a **personalized workout** based on their position during th
 
 **Alice's Workout** - Showcases Anaerobic, Tempo, Threshold and VO2Max zones:
 
-![Alice Workout Visualization](docs/images/sample_alice.png)
+![Alice Workout Visualization](docs/assets/images/sample_alice.png)
 
 ---
 
