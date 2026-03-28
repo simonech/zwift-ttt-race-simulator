@@ -115,6 +115,8 @@ For now, large feature pull requests (especially roadmap implementations) are no
 
 Feel free to open issues or discussions if you’d like to contribute or suggest ideas.
 
+See [CONTRIBUTING](CONTRIBUTING.md) for more details
+
 ---
 
 ## ⚠️ Notes
