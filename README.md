@@ -43,9 +43,11 @@ Bob, 75, 280, 45, 330, 290, 270, 240
 Charlie, 72, 320, 60, 370, 320, 300, 270
 ```
 
-- **PullDuration** in seconds  
-- **P1–P4+** = power targets (watts) per position  
-- Positions ≥4 reuse the last value  
+- **RiderName**: Unique identifier for the rider
+- **Weight**: Rider weight in kg
+- **FTP**: Functional Threshold Power in watts
+- **Pull Duration**: How long the rider pulls at the front, in seconds
+- **Power Values**: Target power in watts for positions 1 (pulling), 2, 3, and 4+ (drafting)
 
 > ℹ️ FTP is used for intensity calculation and visualization (not for rotation logic)
 

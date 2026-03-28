@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} | {{ site.title }}</title>
+    <meta name="description"
+        content="A workout generator for Team Time Trial racing on Zwift designed to help coaches and teams rehearse race strategy and experience realistic race dynamics in ERG mode.">
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simonech.github.io/zwift-ttt-race-simulator/">
+    <meta property="og:title" content="{{ page.title }} | {{ site.title }}">
+    <meta property="og:description"
+        content="A workout generator for Team Time Trial racing on Zwift designed to help coaches and teams rehearse race strategy and experience realistic race dynamics in ERG mode.">
+    <meta property="og:image" content="https://simonech.github.io/zwift-ttt-race-simulator/images/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ page.title }} | {{ site.title }}">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://simonech.github.io/zwift-ttt-race-simulator/">
+    <meta name="twitter:title" content="{{ page.title }} | {{ site.title }}">
+    <meta name="twitter:description"
+        content="A workout generator for Team Time Trial racing on Zwift designed to help coaches and teams rehearse race strategy and experience realistic race dynamics in ERG mode.">
+    <meta name="twitter:image" content="https://simonech.github.io/zwift-ttt-race-simulator/images/og-image.png">
+    <meta name="twitter:image:alt" content="{{ page.title }} | {{ site.title }}">
+
+    <link rel="stylesheet" href="{{ '/assets/styles.css' | relative_url }}">
+</head>
+
+<body>
+    <header class="banner">
+        <img src="{{ '/assets/images/banner.png' | relative_url }}"
+            alt="Zwift TTT Race Simulator - Precision training for WTRL Time Trials" class="banner-image">
+    </header>
+    <nav class="nav">
+        <a href="{{ '/' | relative_url }}">Home</a>
+        <a href="{{ '/getting-started' | relative_url }}">Getting Started</a>
+        <a href="{{ '/concepts' | relative_url }}">Concepts</a>
+        <a href="{{ '/outputs' | relative_url }}">Outputs</a>
+        <a href="{{ '/architecture' | relative_url }}">Architecture</a>
+        <a href="{{ '/roadmap' | relative_url }}">Roadmap</a>
+    </nav>
+
+    <main class="container">
+        {{ content }}
+        <section class="github-link">
+            <a href="https://github.com/simonech/zwift-ttt-race-simulator" class="btn">View on GitHub</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Zwift TTT Race Simulator. Licensed under the MIT License.</p>
+    </footer>
+</body>
+
+</html>
