@@ -1,6 +1,7 @@
 title: Zwift TTT Race Simulator
 description: Precision training for TTT racing
 
+url: "https://simonech.github.io"
 baseurl: "/zwift-ttt-race-simulator"
 markdown: kramdown
 permalink: pretty
