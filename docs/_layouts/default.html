@@ -37,12 +37,18 @@
             alt="Zwift TTT Race Simulator - Precision training for WTRL Time Trials" class="banner-image">
     </header>
     <nav class="nav">
-        <a href="{{ '/' | relative_url }}">Home</a>
-        <a href="{{ '/getting-started' | relative_url }}">Getting Started</a>
-        <a href="{{ '/concepts' | relative_url }}">Concepts</a>
-        <a href="{{ '/outputs' | relative_url }}">Outputs</a>
-        <a href="{{ '/architecture' | relative_url }}">Architecture</a>
-        <a href="{{ '/roadmap' | relative_url }}">Roadmap</a>
+        <a href="{{ '/' | relative_url }}"
+        class="{% if page.url == '/' %}active{% endif %}">Home</a>
+        <a href="{{ '/getting-started' | relative_url }}"
+        class="{% if page.url contains '/getting-started' %}active{% endif %}">Getting Started</a>
+        <a href="{{ '/concepts' | relative_url }}"
+        class="{% if page.url contains '/concepts' %}active{% endif %}">Concepts</a>
+        <a href="{{ '/outputs' | relative_url }}"
+        class="{% if page.url contains '/outputs' %}active{% endif %}">Outputs</a>
+        <a href="{{ '/architecture' | relative_url }}"
+        class="{% if page.url contains '/architecture' %}active{% endif %}">Architecture</a>
+        <a href="{{ '/roadmap' | relative_url }}"
+        class="{% if page.url contains '/roadmap' %}active{% endif %}">Roadmap</a>
     </nav>
 
     <main class="container">

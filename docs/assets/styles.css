@@ -54,6 +54,13 @@ body {
     font-weight: bold;
 }
 
+
+.nav a.active {
+    color: var(--color-orange);
+    font-weight: bold;
+    border-bottom: 2px solid var(--color-orange);
+}
+
 .nav a:hover {
     text-decoration: underline;
 }
