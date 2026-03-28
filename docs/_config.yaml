@@ -1,5 +1,6 @@
 title: Zwift TTT Race Simulator
 description: Precision training for TTT racing
 
+baseurl: "/zwift-ttt-race-simulator"
 markdown: kramdown
 permalink: pretty
